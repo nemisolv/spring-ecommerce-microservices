@@ -13,7 +13,7 @@
 
     <groupId>net.nemisolv</groupId>
     <artifactId>services</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <name>spring-ecommerce-microservices</name>
     <packaging>pom</packaging>
 
@@ -22,6 +22,9 @@
         <module>discovery-service</module>
         <module>gateway</module>
         <module>identity-service</module>
+
+        <module>common-lib</module>
+<!--        <module></module>-->
 <!--        <module>product-service</module>-->
 <!--        <module>order-service</module>-->
     </modules>
@@ -70,6 +73,8 @@
                 <artifactId>commons-validator</artifactId>
                 <version>${commons-validator.version}</version>
             </dependency>
+
+<!--            <dependen -->
 
         </dependencies>
     </dependencyManagement>
