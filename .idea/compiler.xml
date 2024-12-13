@@ -8,7 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
       </profile>
-      <profile name="Annotation profile for spring-ecommerce-microservices" enabled="true">
+      <profile name="Annotation profile for order-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -20,6 +20,7 @@
         </processorPath>
         <module name="config-server" />
         <module name="product-service" />
+        <module name="order-service" />
         <module name="common-lib" />
         <module name="identity-service" />
         <module name="discovery-service" />
@@ -36,6 +37,7 @@
       <module name="gateway" options="-parameters" />
       <module name="identity-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />
+      <module name="order-service" options="-parameters" />
       <module name="product-service" options="-parameters" />
       <module name="services" options="-parameters" />
     </option>

@@ -1,4 +1,4 @@
-package net.nemisolv.notificationservice.kafka.payment;
+package net.nemisolv.lib.core._enum;
 
 public enum PaymentMethod {
 

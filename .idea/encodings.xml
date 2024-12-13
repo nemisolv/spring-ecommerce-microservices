@@ -12,6 +12,8 @@
     <file url="file://$PROJECT_DIR$/services/identity-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/notification-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/notification-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/order-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/services/order-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/product-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/product-service/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/services/src/main/java" charset="UTF-8" />

@@ -1,5 +1,7 @@
 package net.nemisolv.notificationservice.kafka.payment;
 
+import net.nemisolv.lib.core._enum.PaymentMethod;
+
 import java.math.BigDecimal;
 
 public record PaymentConfirmation(
