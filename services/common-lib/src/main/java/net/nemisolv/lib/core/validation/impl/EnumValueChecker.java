@@ -2,7 +2,7 @@ package net.nemisolv.lib.core.validation.impl;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import net.nemisolv.techshop.core.validation.EnumValue;
+import net.nemisolv.lib.core.validation.EnumValue;
 
 public class EnumValueChecker implements ConstraintValidator<EnumValue, Enum<?>> {
 

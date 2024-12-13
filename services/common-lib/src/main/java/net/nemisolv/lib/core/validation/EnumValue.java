@@ -2,7 +2,7 @@ package net.nemisolv.lib.core.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
-import net.nemisolv.techshop.core.validation.impl.EnumValueChecker;
+import net.nemisolv.lib.core.validation.impl.EnumValueChecker;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

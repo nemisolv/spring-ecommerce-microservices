@@ -2,7 +2,7 @@ package net.nemisolv.lib.core.validation.impl;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import net.nemisolv.techshop.core.validation.Mobile;
+import net.nemisolv.lib.core.validation.Mobile;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
