@@ -8,7 +8,7 @@ import net.nemisolv.identity.security.oauth2.CustomOAuth2UserService;
 import net.nemisolv.identity.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
 import net.nemisolv.identity.security.oauth2.OAuth2AuthenticationFailureHandler;
 import net.nemisolv.identity.security.oauth2.OAuth2AuthenticationSuccessHandler;
-import net.nemisolv.lib.core.properties.IgnoredUrlsProperties;
+import net.nemisolv.identity.properties.IgnoredUrlsProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

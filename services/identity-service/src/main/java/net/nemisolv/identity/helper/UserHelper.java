@@ -1,7 +1,7 @@
 package net.nemisolv.identity.helper;
 
 import lombok.RequiredArgsConstructor;
-import net.nemisolv.techshop.repository.UserRepository;
+import net.nemisolv.identity.repository.UserRepository;
 import org.springframework.stereotype.Component;
 
 import java.text.Normalizer;

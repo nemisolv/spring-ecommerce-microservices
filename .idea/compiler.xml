@@ -2,11 +2,11 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="gateway" />
       </profile>
       <profile name="Annotation profile for spring-ecommerce-microservices" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -18,10 +18,12 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
         </processorPath>
+        <module name="product-service" />
         <module name="config-server" />
         <module name="common-lib" />
         <module name="identity-service" />
         <module name="discovery-service" />
+        <module name="gateway" />
       </profile>
     </annotationProcessing>
   </component>
@@ -32,6 +34,7 @@
       <module name="discovery-service" options="-parameters" />
       <module name="gateway" options="-parameters" />
       <module name="identity-service" options="-parameters" />
+      <module name="product-service" options="-parameters" />
       <module name="services" options="-parameters" />
     </option>
   </component>

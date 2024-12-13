@@ -1,68 +1,6 @@
 spring:
   application:
-    name: identity-service
-  datasource:
-    url: jdbc:mysql://localhost:3306/my_db
-    username: root
-    password: nemisolv
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: nemisolv
-    password: kqtgsvxoqyonuiny
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-  security:
-    oauth2:
-      client:
-        registration:
-
-          google:
-            clientId: 108748481333-q03ovpcihsp67ngr7d3apam9feolosgv.apps.googleusercontent.com
-            clientSecret: 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
-            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
-            scope:
-              - email
-              - profile
-          facebook:
-            clientId: 1106813467180481
-            clientSecret: 7ffa2355ccf06f28aee9c121909e45c7
-            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
-            scope:
-              - email
-              - public_profile
-          github:
-            clientId: Iv23ligkDN0nZfgoi5HE
-            clientSecret: 1dcce0ff2e60c015efe37a61b6cd7bd3835a62bb
-            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
-            scope:
-              - user
-              - user:email
-
-
-        provider:
-          github:
-            authorizationUri: https://github.com/login/oauth/authorize
-            tokenUri: https://github.com/login/oauth/access_token
-            userInfoUri: https://api.github.com/user
-            userNameAttribute: login
-
-          facebook:
-            authorizationUri: https://www.facebook.com/v3.0/dialog/oauth
-            tokenUri: https://graph.facebook.com/v3.0/oauth/access_token
-            userInfoUri: https://graph.facebook.com/v3.0/me?fields=id,first_name,middle_name,last_name,name,email,picture
-
-
-
+    name: common-lib
 
 
 

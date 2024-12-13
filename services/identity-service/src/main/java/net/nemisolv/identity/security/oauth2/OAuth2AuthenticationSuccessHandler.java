@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nemisolv.identity.service.JwtService;
 import net.nemisolv.lib.core.exception.BadRequestException;
-import net.nemisolv.lib.core.properties.AppProperties;
+import net.nemisolv.identity.properties.AppProperties;
 import net.nemisolv.lib.util.CookieUtil;
 import net.nemisolv.lib.util.ResultCode;
 import org.springframework.security.core.Authentication;

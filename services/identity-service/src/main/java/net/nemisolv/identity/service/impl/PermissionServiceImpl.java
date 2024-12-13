@@ -1,24 +1,26 @@
 package net.nemisolv.identity.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import net.nemisolv.techshop.core._enum.PermissionName;
-import net.nemisolv.techshop.core._enum.RoleName;
-import net.nemisolv.techshop.core.exception.BadRequestException;
-import net.nemisolv.techshop.core.exception.PermissionException;
-import net.nemisolv.techshop.entity.Permission;
-import net.nemisolv.techshop.entity.Role;
-import net.nemisolv.techshop.helper.AccessHelper;
-import net.nemisolv.techshop.mapper.PermissionMapper;
-import net.nemisolv.techshop.payload.PagedResponse;
-import net.nemisolv.techshop.payload.QueryOption;
-import net.nemisolv.techshop.payload.permission.AssignPermissionToRoleRequest;
-import net.nemisolv.techshop.payload.permission.PermissionResponse;
-import net.nemisolv.techshop.repository.PermissionRepository;
-import net.nemisolv.techshop.repository.RoleRepository;
-import net.nemisolv.techshop.security.UserPrincipal;
-import net.nemisolv.techshop.security.context.AuthContext;
-import net.nemisolv.techshop.service.PermissionService;
-import net.nemisolv.techshop.util.ResultCode;
+
+import net.nemisolv.identity.entity.Permission;
+import net.nemisolv.identity.entity.Role;
+import net.nemisolv.identity.helper.AccessHelper;
+import net.nemisolv.identity.mapper.PermissionMapper;
+import net.nemisolv.identity.payload.permission.AssignPermissionToRoleRequest;
+import net.nemisolv.identity.payload.permission.PermissionResponse;
+import net.nemisolv.identity.repository.PermissionRepository;
+import net.nemisolv.identity.repository.RoleRepository;
+import net.nemisolv.identity.security.UserPrincipal;
+import net.nemisolv.identity.security.context.AuthContext;
+import net.nemisolv.identity.service.PermissionService;
+import net.nemisolv.lib.core._enum.PermissionName;
+import net.nemisolv.lib.core._enum.RoleName;
+import net.nemisolv.lib.core.exception.BadRequestException;
+import net.nemisolv.lib.core.exception.PermissionException;
+import net.nemisolv.lib.core.exception.ResourceNotFoundException;
+import net.nemisolv.lib.payload.PagedResponse;
+import net.nemisolv.lib.payload.QueryOption;
+import net.nemisolv.lib.util.ResultCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +33,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import static net.nemisolv.techshop.helper.AccessHelper.isBasicPermission;
+import static net.nemisolv.identity.helper.AccessHelper.isBasicPermission;
+
 
 @Service
 @RequiredArgsConstructor
@@ -74,7 +77,7 @@ public class PermissionServiceImpl implements PermissionService {
                                 .toList()
                 )
                 .pageNo(permissionsPage.getNumber())
-                .limit(permissionsPage.getSize())
+                .pageSize(permissionsPage.getSize())
                 .totalElements(permissionsPage.getTotalElements())
                 .totalPages(permissionsPage.getTotalPages())
                 .build();
@@ -84,14 +87,14 @@ public class PermissionServiceImpl implements PermissionService {
     public PermissionResponse getPermissionById(Long id) {
         return permissionRepository.findById(id)
                 .map(permissionMapper::toResponse)
-                .orElseThrow(() -> new net.nemisolv.techshop.core.exception.ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Permission not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Permission not found with id: " + id));
     }
 
     @Override
     public List<PermissionResponse> getPermissionsByRole(Long roleId) {
         Optional<Role> role = roleRepository.findById(roleId);
         if(role.isEmpty()) {
-            throw new net.nemisolv.techshop.core.exception.ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Role not found with id: " + roleId);
+            throw new ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Role not found with id: " + roleId);
         }
         return role.get().getPermissions().stream()
                 .map(permissionMapper::toResponse)
@@ -99,6 +102,8 @@ public class PermissionServiceImpl implements PermissionService {
 
 
     }
+
+
 
     @Override
     public PermissionResponse assignPermissionToRole(AssignPermissionToRoleRequest request) {
@@ -112,9 +117,9 @@ public class PermissionServiceImpl implements PermissionService {
         }
 
         Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new net.nemisolv.techshop.core.exception.ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Role not found with id: " + roleId));
+                .orElseThrow(() -> new ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Role not found with id: " + roleId));
         Permission permission = permissionRepository.findById(permissionId)
-                .orElseThrow(() -> new net.nemisolv.techshop.core.exception.ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Permission not found with id: " + permissionId));
+                .orElseThrow(() -> new ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Permission not found with id: " + permissionId));
 
         if(role.getPermissions().contains(permission)) {
             throw new BadRequestException(ResultCode.PERMISSION_ALREADY_ASSIGNED);
@@ -145,13 +150,13 @@ public class PermissionServiceImpl implements PermissionService {
         }
 
         Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new net.nemisolv.techshop.core.exception.ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Role not found with id: " + roleId));
+                .orElseThrow(() -> new ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Role not found with id: " + roleId));
         List<Permission> permissions = permissionRepository.findAllById(permissionIds);
 
 
 
         if(permissionIds.size() != permissions.size()) {
-            throw new net.nemisolv.techshop.core.exception.ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Some permissions not found");
+            throw new ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Some permissions not found");
         }
 
 

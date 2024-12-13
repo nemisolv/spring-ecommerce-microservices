@@ -2,7 +2,6 @@ package net.nemisolv.identity.service;
 
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -13,7 +12,7 @@ import net.nemisolv.identity.payload.auth.IntrospectRequest;
 import net.nemisolv.identity.payload.auth.IntrospectResponse;
 import net.nemisolv.identity.repository.UserRepository;
 import net.nemisolv.identity.security.UserPrincipal;
-import net.nemisolv.lib.core.properties.JWTTokenProperties;
+import net.nemisolv.identity.properties.JWTTokenProperties;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 

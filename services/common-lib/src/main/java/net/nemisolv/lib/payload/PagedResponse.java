@@ -16,7 +16,7 @@ import java.util.List;
 public class PagedResponse<T> {
     private int pageNo;
     private int pageSize;
-    private List<T> metadata;
+    private List<T> records;
     private String title;
     private long totalElements;
     private int totalPages;

@@ -34,7 +34,6 @@ public class BaseRedisConfig {
     }
 
     @Bean
-    @Deprecated
     public RedisSerializer<Object> redisSerializer() {
         // Create Jackson serializer for objects
         Jackson2JsonRedisSerializer<Object> serializer = new Jackson2JsonRedisSerializer<>(Object.class);
