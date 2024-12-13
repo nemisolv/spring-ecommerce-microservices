@@ -24,6 +24,7 @@
         <module name="identity-service" />
         <module name="discovery-service" />
         <module name="gateway" />
+        <module name="notification-service" />
       </profile>
     </annotationProcessing>
   </component>
@@ -34,6 +35,7 @@
       <module name="discovery-service" options="-parameters" />
       <module name="gateway" options="-parameters" />
       <module name="identity-service" options="-parameters" />
+      <module name="notification-service" options="-parameters" />
       <module name="product-service" options="-parameters" />
       <module name="services" options="-parameters" />
     </option>

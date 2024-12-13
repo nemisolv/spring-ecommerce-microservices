@@ -23,7 +23,7 @@
         <module>gateway</module>
         <module>identity-service</module>
         <module>common-lib</module>
-<!--        <module></module>-->
+        <module>notification-service</module>
         <module>product-service</module>
 <!--        <module>order-service</module>-->
     </modules>

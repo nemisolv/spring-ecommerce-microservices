@@ -215,6 +215,11 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .permissions(allPermissions.stream()
                             .filter(p -> p.getName().name().startsWith("VIEW_")
                                     || p.getName().name().equals("CREATE_ORDER"))
+                            .filter(p -> !p.getName().equals(PermissionName.VIEW_INVENTORY)
+                                    && !p.getName().equals(PermissionName.VIEW_INVENTORY_REPORT)
+                                    && !p.getName().equals(PermissionName.VIEW_SALES_REPORT)
+                            )
+
                             .collect(Collectors.toSet()))
                     .build();
 

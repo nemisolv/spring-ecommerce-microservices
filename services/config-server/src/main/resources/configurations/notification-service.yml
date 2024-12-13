@@ -20,14 +20,13 @@ spring:
         spring.json.trusted.packages: '*'
         spring.json.type.mapping: orderConfirmation:com.nemisolv.ecommerce.kafka.order.OrderConfirmation,paymentConfirmation:com.nemisolv.ecommerce.kafka.payment.PaymentConfirmation
   mail:
-    host: localhost
-    port: 1025
+    host: smtp.gmail.com
+    port: 587
     username: nemisolv
-    password: nemisolv
+    password: kqtgsvxoqyonuiny
     properties:
       mail:
         smtp:
-          trust: "*"
         auth: true
         starttls:
           enabled: true

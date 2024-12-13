@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipping Confirmation - Tech Shop</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #ffffff; color: #000000;">
+
+<table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+        <td align="center" style="padding: 40px 0;">
+            <table role="presentation" style="width: 600px; border-collapse: collapse; border: 1px solid #cccccc; background-color: #ffffff;">
+                <tr>
+                    <td style="padding: 40px 30px 20px 30px; text-align: center;">
+                        <h1 style="font-size: 24px; margin: 0;">Shipping Confirmation - Tech Shop</h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 20px 30px 40px 30px;">
+                        <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px;">Dear <span th:text="${customerName}"></span>,</p>
+                        <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px;">We are pleased to inform you that your order has been shipped. Here are the shipment details:</p>
+                        <!-- Include shipment details here -->
+                        <p style="margin: 0; text-align: center;">
+                            <a th:href="@{${shipmentDetailsUrl}}" style="background-color: #000000; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 4px; display: inline-block; font-weight: bold;">Track Shipment</a>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 30px; background-color: #f0f0f0; text-align: center;">
+                        <p style="margin: 0; font-size: 14px; line-height: 20px;">&copy; Tech Shop, 2024<br><a href="https://google.com" style="color: #000000; text-decoration: underline;">Visit our website</a></p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

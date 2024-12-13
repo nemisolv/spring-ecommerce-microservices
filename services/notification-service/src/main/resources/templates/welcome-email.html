@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to Tech Shop</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #ffffff; color: #000000;">
+
+<table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+        <td align="center" style="padding: 40px 0;">
+            <table role="presentation" style="width: 600px; border-collapse: collapse; border: 1px solid #cccccc; background-color: #ffffff;">
+                <tr>
+                    <td style="padding: 40px 30px 20px 30px; text-align: center;">
+                        <h1 style="font-size: 24px; margin: 0;">Welcome to Tech Shop</h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 20px 30px 40px 30px;">
+                        <p style="margin: 0; font-size: 16px; line-height: 24px; text-align: center;">
+                            Dear <span th:text="${customerName}"></span>,<br><br>
+                            Thank you for joining Tech Shop. We're excited to have you onboard!<br>
+                            Start exploring our latest tech products and enjoy an exceptional shopping experience.<br><br>
+                            Best regards,<br>
+                            The Tech Shop Team
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 30px; background-color: #f0f0f0; text-align: center;">
+                        <p style="margin: 0; font-size: 14px; line-height: 20px;">&copy; Tech Shop, 2024<br><a href="https://google.com" style="color: #000000; text-decoration: underline;">Visit our website</a></p>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
