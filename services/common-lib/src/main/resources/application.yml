@@ -2,6 +2,10 @@ spring:
   application:
    name:
     common-lib
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 
 app:

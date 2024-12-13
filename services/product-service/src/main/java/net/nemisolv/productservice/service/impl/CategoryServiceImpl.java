@@ -29,6 +29,11 @@ public class CategoryServiceImpl implements CategoryService {
                 .ifPresent(c -> {
                     throw new IllegalArgumentException("Category already exists");
                 });
+        if(request.parentId() != null) {
+            Category parentCategory = categoryRepository.findById(request.parentId())
+                    .orElseThrow(() -> new IllegalArgumentException("Parent category not found"));
+            category.setParent(parentCategory);
+        }
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
@@ -49,7 +54,16 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(Long id) {
-        categoryRepository.deleteById(id);
+        Optional<Category> categoryOptional = categoryRepository.findById(id);
+        if(categoryOptional.isEmpty()) {
+            throw new IllegalArgumentException("Category not found");
+        }
+        Category category = categoryOptional.get();
+        if(category.getProducts().isEmpty()) {
+            categoryRepository.delete(category);
+        } else {
+            throw new IllegalArgumentException("Category has some products associated with it");
+        }
 
     }
 

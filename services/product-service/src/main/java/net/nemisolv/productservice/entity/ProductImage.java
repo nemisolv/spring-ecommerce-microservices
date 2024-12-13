@@ -12,7 +12,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "products")
+@Table(name = "products_images")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

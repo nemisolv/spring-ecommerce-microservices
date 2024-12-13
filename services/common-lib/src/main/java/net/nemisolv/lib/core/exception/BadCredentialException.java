@@ -1,6 +1,5 @@
 package net.nemisolv.lib.core.exception;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import net.nemisolv.lib.util.ResultCode;

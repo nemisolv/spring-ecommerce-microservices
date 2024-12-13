@@ -30,5 +30,20 @@ public class Category extends IdBaseEntity {
     private List<Category> children = new ArrayList<>();
 
 
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    private List<Product> products = new ArrayList<>();
+
+    public void addChild(Category category) {
+        children.add(category);
+        category.setParent(this);
+    }
+
+    public void removeChild(Category category) {
+        children.remove(category);
+        category.setParent(null);
+    }
+
+
+
 
 }

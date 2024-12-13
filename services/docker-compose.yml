@@ -33,6 +33,21 @@ services:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=nemisolv
       - ME_CONFIG_MONGODB_ADMINPASSWORD=nemisolv
       - ME_CONFIG_MONGODB_SERVER=mongodb
+  redis:
+    image: redis:7.0.11
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - spring-ecommerce-network
+
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin
+    ports:
+        - "9411:9411"
+    networks:
+        - spring-ecommerce-network
 
 
 networks:

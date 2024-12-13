@@ -74,6 +74,11 @@
             </dependency>
 
             <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-validation</artifactId>
+            </dependency>
+
+            <dependency>
                 <groupId>net.nemisolv</groupId>
                 <artifactId>common-lib</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
@@ -103,6 +108,8 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
+
+
 
 
         <dependency>
