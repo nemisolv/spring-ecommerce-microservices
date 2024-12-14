@@ -3,3 +3,19 @@ spring:
     import: optional:configserver:http://localhost:8888
   application:
     name: notification-service
+
+#    can't store this info to config server -> don't know, fix later
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: nemisolv
+    password: kqtgsvxoqyonuiny
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+#          connectiontimeout: 5000
+#          timeout: 3000
+#          writetimeout: 5000

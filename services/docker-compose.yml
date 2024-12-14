@@ -16,7 +16,7 @@ services:
     image: mongo:8.0.4
     container_name: mongo_db
     ports:
-      - 27018:27017
+      - 27017:27017
     volumes:
       - mongo:/data
     environment:

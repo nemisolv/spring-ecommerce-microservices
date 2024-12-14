@@ -18,18 +18,11 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: '*'
-        spring.json.type.mapping: orderConfirmation:com.nemisolv.ecommerce.kafka.order.OrderConfirmation,paymentConfirmation:com.nemisolv.ecommerce.kafka.payment.PaymentConfirmation
+        spring.json.type.mapping: orderConfirmation:net.nemisolv.notificationservice.kafka.order.OrderConfirmation,paymentConfirmation:net.nemisolv.notificationservice.kafka.payment.PaymentConfirmation, sendMailWithToken:net.nemisolv.notificationservice.kafka.identity.SendMailWithToken
+
+
+
+
+app:
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: nemisolv
-    password: kqtgsvxoqyonuiny
-    properties:
-      mail:
-        smtp:
-        auth: true
-        starttls:
-          enabled: true
-        connectiontimeout: 5000
-        timeout: 3000
-        writetimeout: 5000
+    from: nemisolv@gmail.com

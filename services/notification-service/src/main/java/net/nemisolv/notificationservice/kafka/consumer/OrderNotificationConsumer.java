@@ -1,4 +1,4 @@
-package net.nemisolv.notificationservice.kafka;
+package net.nemisolv.notificationservice.kafka.consumer;
 
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +12,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+
 import static java.lang.String.format;
 import static net.nemisolv.notificationservice.notification.NotificationType.ORDER_CONFIRMATION;
 import static net.nemisolv.notificationservice.notification.NotificationType.PAYMENT_CONFIRMATION;
@@ -19,7 +21,7 @@ import static net.nemisolv.notificationservice.notification.NotificationType.PAY
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class NotificationsConsumer {
+public class OrderNotificationConsumer {
 
     private final NotificationRepository repository;
     private final EmailService emailService;
@@ -30,7 +32,7 @@ public class NotificationsConsumer {
                 Notification.builder()
                         .type(PAYMENT_CONFIRMATION)
                         .notificationDate(LocalDateTime.now())
-                        .paymentConfirmation(paymentConfirmation)
+                        .details(Map.of("paymentConfirmation", paymentConfirmation))
                         .build()
         );
         var customerName = paymentConfirmation.customerFirstname() + " " + paymentConfirmation.customerLastname();
@@ -42,14 +44,14 @@ public class NotificationsConsumer {
         );
     }
 
-    @KafkaListener(topics = "order-topic")
+    @KafkaListener(topics = "order-created-topic")
     public void consumeOrderConfirmationNotifications(OrderConfirmation orderConfirmation) throws MessagingException {
-        log.info(format("Consuming the message from order-topic Topic:: %s", orderConfirmation));
+        log.info(format("Consuming the message from order-created-topic Topic:: %s", orderConfirmation));
         repository.save(
                 Notification.builder()
                         .type(ORDER_CONFIRMATION)
                         .notificationDate(LocalDateTime.now())
-                        .orderConfirmation(orderConfirmation)
+                        .details(Map.of("orderConfirmation", orderConfirmation))
                         .build()
         );
         var customerName = orderConfirmation.customer().name();

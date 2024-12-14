@@ -29,6 +29,8 @@
 		<java.version>17</java.version>
 		<spring-cloud.version>2024.0.0</spring-cloud.version>
 	</properties>
+
+
 	<dependencies>
 
 		<!--         common lib    -->
@@ -92,6 +94,12 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>net.nemisolv</groupId>
+				<artifactId>common-lib</artifactId>
+				<version>${revision}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 

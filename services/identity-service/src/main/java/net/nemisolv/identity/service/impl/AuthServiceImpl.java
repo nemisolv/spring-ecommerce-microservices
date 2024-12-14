@@ -10,7 +10,9 @@ import net.nemisolv.identity.entity.ConfirmationEmail;
 import net.nemisolv.identity.entity.Role;
 import net.nemisolv.identity.entity.User;
 import net.nemisolv.identity.helper.UserHelper;
+import net.nemisolv.identity.kafka.AuthProducer;
 import net.nemisolv.identity.mapper.UserMapper;
+import net.nemisolv.identity.payload.RecipientInfo;
 import net.nemisolv.identity.payload.auth.*;
 import net.nemisolv.identity.repository.ConfirmationEmailRepository;
 import net.nemisolv.identity.repository.RoleRepository;
@@ -28,6 +30,7 @@ import net.nemisolv.lib.core.exception.PermissionException;
 import net.nemisolv.lib.core.exception.ResourceNotFoundException;
 import net.nemisolv.lib.util.ResultCode;
 import org.springframework.http.HttpHeaders;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -55,7 +58,10 @@ public class AuthServiceImpl implements AuthService {
     private final ConfirmationEmailRepository confirmationEmailRepo;
     private final UserHelper userHelper;
     private final UserMapper userMapper;
-//    private final EmailService emailService;
+
+
+    // sending email
+    private final AuthProducer authProducer;
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authRequest) {
@@ -102,6 +108,8 @@ public class AuthServiceImpl implements AuthService {
         // Kiểm tra quyền của user hiện tại
         if (currentUser.getRole().getName().equals(RoleName.ADMIN)) {
             // Admin có thể gán bất kỳ role nào
+            User newUser = createUser(authRequest, roleToAssign);
+            userRepo.save(newUser);
         } else if (currentUser.getRole().getName().equals(RoleName.MANAGER)) {
             // Manager chỉ được gán các role cụ thể
             if (!isAssignableByManager(roleToAssign)) {
@@ -111,8 +119,7 @@ public class AuthServiceImpl implements AuthService {
             throw new PermissionException("Unauthorized to assign roles.");
         }
 
-        User newUser = createUser(authRequest, roleToAssign);
-        userRepo.save(newUser);
+
     }
 
     @Override
@@ -155,6 +162,15 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
         // TODO: Implement email sending logic
+        authProducer.sendForgotPasswordEmail(new SendMailWithToken(
+                new RecipientInfo(
+                        user.getName(),
+                        user.getEmail()
+                ),
+
+                "token here"
+
+        ));
     }
 
     @Override
@@ -222,7 +238,14 @@ public class AuthServiceImpl implements AuthService {
 
         confirmationEmailRepo.save(confirmationEmail);
 //        emailService.sendRegistrationEmail(user, token);
-        // send email -> using email service
+        // sending mail with kafka producer
+        authProducer.sendConfirmationRegistrationUser(new SendMailWithToken(
+                new RecipientInfo(
+                        user.getEmail(),
+                        user.getName()
+                ),
+                token
+        ));
     }
 
     private User createUser(RegisterRequest authRequest, Role role) {

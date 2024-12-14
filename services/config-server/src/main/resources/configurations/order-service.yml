@@ -14,7 +14,7 @@ spring:
   kafka:
     producer:
       bootstrap-servers: localhost:9092
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializerhgn
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.type.mapping: orderConfirmation:com.nemisolv.ecommerce.kafka.OrderConfirmation
