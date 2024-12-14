@@ -40,35 +40,43 @@ public enum ResultCode {
 
     PERMISSION_ALREADY_ASSIGNED(20009, "Permission already assigned to role"),
 
+    /**
+     * Customer related errors
+     */
 
+    CUSTOMER_NOT_FOUND(20012, "Customer does not exist"),
+    CUSTOMER_SAVE_ERROR(20013, "Customer save failed"),
+    CUSTOMER_UPDATE_ERROR(20014, "Customer update failed"),
+    CUSTOMER_DELETE_ERROR(20015, "Customer delete failed"),
 
 
     /**
-     * Store related errors
+     * Order related errors
      */
-    STORE_NOT_FOUND(50001, "Store not found"),
-    STORE_NAME_ALREADY_EXISTS(50002, "Store name already exists"),
-    STORE_ALREADY_HAS_STORE(50003, "You already own a store"),
-    STORE_NOT_OPENED(50004, "This member has not opened a store"),
-    STORE_NOT_LOGGED_IN(50005, "Not logged in to store"),
-    STORE_CLOSED(50006, "Store is closed, please contact the administrator"),
-    STORE_DELIVER_PRODUCT_ADDRESS(50007, "Please provide the supplier's shipping address"),
-    FREIGHT_TEMPLATE_NOT_FOUND(50010, "Current template does not exist"),
-    STORE_STATUS_IN_PROGRESS(50011, "Store is in registration or approval process, please do not repeat the operation"),
-    STORE_SHIPPING_ADDRESS_REQUIRED(50012, "Please provide a shipping address"),
+
+    ORDER_NOT_FOUND(30001, "Order does not exist"),
+    ORDER_STATUS_ERROR(30002, "Order status error"),
+    ORDER_CANCEL_ERROR(30003, "Order cancellation failed"),
+    ORDER_CONFIRM_ERROR(30004, "Order confirmation failed"),
+    ORDER_PAYMENT_ERROR(30005, "Order payment failed"),
+    ORDER_SHIP_ERROR(30006, "Order shipping failed"),
+    ORDER_RECEIVE_ERROR(30007, "Order receiving failed"),
+    ORDER_RETURN_ERROR(30008, "Order return failed"),
+    ORDER_REFUND_ERROR(30009, "Order refund failed"),
+
+    ORDER_LINE_NOT_FOUND(30010, "Order line does not exist"),
+    ORDER_LINE_SAVE_ERROR(30011, "Order line save failed"),
+
+
 
     /**
      * Product related errors
      */
     PRODUCT_ERROR(11001, "Product error, please try again later"),
     PRODUCT_NOT_EXIST(11001, "Product is out of stock"),
-    PRODUCT_NAME_ERROR(11002, "Product name is incorrect, name must be between 2-50 characters"),
     PRODUCT_UNDER_ERROR(11003, "Product shelf down failed"),
     PRODUCT_UPPER_ERROR(11004, "Product shelf up failed"),
     PRODUCT_AUTH_ERROR(11005, "Product approval failed"),
-    POINT_PRODUCT_ERROR(11006, "Point accumulation product transaction error, please try again later"),
-    POINT_PRODUCT_NOT_EXIST(11020, "Point accumulation product does not exist"),
-    POINT_PRODUCT_CATEGORY_EXIST(11021, "Point accumulation product category already exists"),
     PRODUCT_SKU_SN_ERROR(11007, "Product SKU code cannot be empty"),
     PRODUCT_SKU_PRICE_ERROR(11008, "Product SKU price cannot be less than or equal to 0"),
     PRODUCT_SKU_COST_ERROR(11009, "Product SKU cost price cannot be less than or equal to 0"),
@@ -89,6 +97,8 @@ public enum ResultCode {
     PRODUCT_NOT_EXIST_STORE(11017, "Current user does not have permission to operate this product"),
     PRODUCT_TYPE_ERROR(11016, "Product type must be selected"),
     PRODUCT_STOCK_IMPORT_ERROR(11018, "Product stock import failed, please check the data in the table"),
+
+    PRODUCT_PURCHASE_ERROR(11019, "Product purchase failed"),
 
     /**
      * Brand related errors

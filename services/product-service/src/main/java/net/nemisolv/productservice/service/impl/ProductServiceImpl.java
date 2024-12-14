@@ -4,15 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import net.nemisolv.lib.core._enum.PermissionName;
+import net.nemisolv.lib.core.exception.ProductPurchaseException;
 import net.nemisolv.lib.core.exception.ResourceNotFoundException;
 import net.nemisolv.lib.payload.PagedResponse;
 import net.nemisolv.lib.payload.QueryOption;
 import net.nemisolv.lib.util.ResultCode;
+import net.nemisolv.productservice.client.InventoryClient;
 import net.nemisolv.productservice.entity.Product;
 import net.nemisolv.productservice.mapper.ProductMapper;
+import net.nemisolv.productservice.payload.exchange.CheckProductAvailabilityRequest;
 import net.nemisolv.productservice.payload.product.request.CreateProductRequest;
+import net.nemisolv.productservice.payload.product.request.ProductPurchaseRequest;
 import net.nemisolv.productservice.payload.product.request.UpdateProductRequest;
 import net.nemisolv.productservice.payload.product.response.ProductOverviewResponse;
+import net.nemisolv.productservice.payload.product.response.ProductPurchaseResponse;
 import net.nemisolv.productservice.payload.product.response.ProductResponse;
 import net.nemisolv.productservice.repository.ProductRepository;
 import net.nemisolv.productservice.service.ProductService;
@@ -21,7 +26,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +40,7 @@ import org.springframework.util.StringUtils;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private final InventoryClient inventoryClient;
 
     @Override
     public PagedResponse<ProductOverviewResponse> getProducts(QueryOption queryOption) {
@@ -109,5 +121,59 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProduct(Long id) {
 
+    }
+
+    @Override
+    @Transactional(rollbackFor = ProductPurchaseException.class)
+    public List<ProductPurchaseResponse> purchaseProducts(List<ProductPurchaseRequest> request) {
+        var productIds = request
+                .stream()
+                .map(ProductPurchaseRequest::productId)
+                .toList();
+
+        // Validate products
+
+        var storedProducts = productRepository.findAllByIdInOrderById(productIds);
+        if (productIds.size() != storedProducts.size()) {
+            throw new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_ERROR,"One or more products does not exist");
+        }
+
+        // check stock in Inventory
+        var stockMap = inventoryClient.checkStock(productIds);
+        for(var req: request) {
+            if(stockMap.get(req.productId()) < req.quantity()) {
+                throw new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_ERROR,"Insufficient stock quantity for product with ID:: " + req.productId());
+            }
+        }
+
+        // bulk update local stock persist
+        request.forEach(req -> {
+            var product = storedProducts.stream()
+                    .filter(p -> p.getId().equals(req.productId()))
+                    .findFirst()
+                    .orElseThrow(() -> new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_ERROR,"Product not found"));
+            product.setQuantity(product.getQuantity() - req.quantity());
+        });
+
+        productRepository.saveAll(storedProducts);
+
+
+        // notify inventory service to update stock
+        var updateMap = request.stream()
+                .collect(Collectors.toMap(ProductPurchaseRequest::productId,
+                        ProductPurchaseRequest::quantity));
+
+        inventoryClient.updateStock(updateMap);
+
+        // map to response
+        return storedProducts.stream()
+                .map(product -> {
+                    var req = request.stream()
+                            .filter(r -> r.productId().equals(product.getId()))
+                            .findFirst()
+                            .orElseThrow(() -> new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_ERROR,"Product not found"));
+                    return productMapper.toproductPurchaseResponse(product, req.quantity());
+                })
+                .toList();
     }
 }

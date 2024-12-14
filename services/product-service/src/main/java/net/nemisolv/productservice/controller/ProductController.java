@@ -6,12 +6,16 @@ import net.nemisolv.lib.payload.ApiResponse;
 import net.nemisolv.lib.payload.PagedResponse;
 import net.nemisolv.lib.payload.QueryOption;
 import net.nemisolv.productservice.payload.product.request.CreateProductRequest;
+import net.nemisolv.productservice.payload.product.request.ProductPurchaseRequest;
 import net.nemisolv.productservice.payload.product.request.UpdateProductRequest;
 import net.nemisolv.productservice.payload.product.response.ProductOverviewResponse;
+import net.nemisolv.productservice.payload.product.response.ProductPurchaseResponse;
 import net.nemisolv.productservice.payload.product.response.ProductResponse;
 import net.nemisolv.productservice.service.ProductService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,6 +41,20 @@ public class ProductController {
 
         return ApiResponse.success(productService.getProductById(id));
     }
+
+
+    @PostMapping("/purchase")
+    public ApiResponse<List<ProductPurchaseResponse>> purchaseProducts(
+            @RequestBody List<ProductPurchaseRequest> request
+    ) {
+        return ApiResponse.success(productService.purchaseProducts(request));
+    }
+
+
+
+
+
+
 
     @GetMapping("/categories/{categoryId}")
     public ApiResponse<PagedResponse<ProductOverviewResponse>> getProductsByCategory(@PathVariable Long categoryId,

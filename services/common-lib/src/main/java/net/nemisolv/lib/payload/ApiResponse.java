@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import net.nemisolv.lib.util.ResultCode;
 
 import java.util.Collection;
 
@@ -15,7 +16,7 @@ import java.util.Collection;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
-    private Boolean success;
+    private int  code;
     private String message;
     private Integer count;
     private T data;
@@ -23,7 +24,7 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> success(T data) {
 
         return ApiResponse.<T>builder()
-                .success(true)
+                .code(ResultCode.SUCCESS.code())
                 .data(data)
                 .count(data instanceof Collection ? ((Collection<?>) data).size() : null)
                 .build();
@@ -32,21 +33,21 @@ public class ApiResponse<T> {
     // no content
     public static <T> ApiResponse<T> success() {
         return ApiResponse.<T>builder()
-                .success(true)
+                .code(ResultCode.SUCCESS.code())
                 .build();
     }
 
     // no content with message
     public static <T> ApiResponse<T> success(String message) {
         return ApiResponse.<T>builder()
-                .success(true)
+                .code(ResultCode.SUCCESS.code())
                 .message(message)
                 .build();
     }
 
     public static <T> ApiResponse<T> error(String message) {
         return ApiResponse.<T>builder()
-                .success(false)
+                .code(ResultCode.INTERNAL_SERVER_ERROR.code())
                 .message(message)
                 .build();
     }

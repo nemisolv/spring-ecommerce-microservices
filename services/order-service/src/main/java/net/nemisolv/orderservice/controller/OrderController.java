@@ -1,12 +1,10 @@
 package net.nemisolv.orderservice.controller;
-
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.nemisolv.lib.payload.ApiResponse;
 import net.nemisolv.orderservice.payload.OrderRequest;
 import net.nemisolv.orderservice.payload.OrderResponse;
 import net.nemisolv.orderservice.service.OrderService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,21 +22,24 @@ public class OrderController {
   private final OrderService orderService;
 
   @PostMapping
-  public ResponseEntity<Integer> createOrder(
+  public ApiResponse
+          <Integer> createOrder(
       @RequestBody @Valid OrderRequest request
   ) {
-    return ResponseEntity.ok(this.orderService.createOrder(request));
+    return ApiResponse.success(this.orderService.createOrder(request));
   }
 
   @GetMapping
-  public ResponseEntity<List<OrderResponse>> findAll() {
-    return ResponseEntity.ok(this.orderService.findAllOrders());
+  public ApiResponse<List<OrderResponse>> findAll() {
+    return ApiResponse.success(this.orderService.findAllOrders());
   }
 
   @GetMapping("/{order-id}")
-  public ResponseEntity<OrderResponse> findById(
+  public ApiResponse
+          <OrderResponse> findById(
       @PathVariable("order-id") Integer orderId
   ) {
-    return ResponseEntity.ok(this.orderService.findById(orderId));
+    return ApiResponse.success
+            (this.orderService.findById(orderId));
   }
 }
