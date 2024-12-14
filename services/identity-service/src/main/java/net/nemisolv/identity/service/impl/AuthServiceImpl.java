@@ -28,9 +28,11 @@ import net.nemisolv.lib.core.exception.BadCredentialException;
 import net.nemisolv.lib.core.exception.BadRequestException;
 import net.nemisolv.lib.core.exception.PermissionException;
 import net.nemisolv.lib.core.exception.ResourceNotFoundException;
+import net.nemisolv.lib.util.CommonUtil;
+import net.nemisolv.lib.util.CryptoUtil;
 import net.nemisolv.lib.util.ResultCode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -41,9 +43,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static net.nemisolv.lib.util.Constants.EXP_TIME_REGISTRATION_EMAIL;
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +63,9 @@ public class AuthServiceImpl implements AuthService {
     private final ConfirmationEmailRepository confirmationEmailRepo;
     private final UserHelper userHelper;
     private final UserMapper userMapper;
+
+    @Value("${app.secure.auth_secret}")
+    private String authSecret;
 
 
     // sending email
@@ -84,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void registerExternal(RegisterRequest authRequest) throws MessagingException {
+    public void registerExternal(RegisterRequest authRequest) throws MessagingException, NoSuchAlgorithmException {
         Optional<User> existingUser = userRepo.findByEmail(authRequest.getEmail());
 
         if (existingUser.isPresent()) {
@@ -140,7 +148,16 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void verifyEmail(String token) {
+        ConfirmationEmail confirmationEmail = validateConfirmationEmail(token);
 
+        User user = userRepo.findById(confirmationEmail.getUserId())
+                .orElseThrow(() -> new BadRequestException(ResultCode.USER_NOT_FOUND));
+
+        user.setEmailVerified(true);
+        confirmationEmail.setConfirmedAt(LocalDateTime.now());
+
+        userRepo.save(user);
+        confirmationEmailRepo.save(confirmationEmail);
     }
 
 //    @Override
@@ -162,13 +179,13 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
         // TODO: Implement email sending logic
-        authProducer.sendForgotPasswordEmail(new SendMailWithToken(
+        authProducer.sendForgotPasswordEmail(new SendMailWithOtpToken(
                 new RecipientInfo(
                         user.getName(),
                         user.getEmail()
                 ),
 
-                "token here"
+                null
 
         ));
     }
@@ -208,7 +225,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    private void handleExistingUserForRegistration(User user, RegisterRequest authRequest) throws MessagingException {
+    private void handleExistingUserForRegistration(User user, RegisterRequest authRequest) throws MessagingException, NoSuchAlgorithmException {
         if (user.isEmailVerified()) {
             throw new BadCredentialException(ResultCode.USER_ALREADY_EXISTS);
         }
@@ -217,7 +234,7 @@ public class AuthServiceImpl implements AuthService {
         sendVerificationEmail(user);
     }
 
-    private void createAndSendVerificationEmail(RegisterRequest authRequest) throws MessagingException {
+    private void createAndSendVerificationEmail(RegisterRequest authRequest) throws MessagingException, NoSuchAlgorithmException {
         Role customerRole = roleRepo.findByName(RoleName.CUSTOMER).orElseThrow(() -> new ResourceNotFoundException("Role not found"));
 
         User newUser = createUser(authRequest, customerRole);
@@ -226,25 +243,29 @@ public class AuthServiceImpl implements AuthService {
         sendVerificationEmail(newUser);
     }
 
-    private void sendVerificationEmail(User user) throws MessagingException {
-        String token = jwtService.generateToken(UserPrincipal.create(user));
+    private void sendVerificationEmail(User user) throws MessagingException, NoSuchAlgorithmException {
+        String otp = CommonUtil.getRandomNum();  // 6 digits
+        String token = CryptoUtil.sha256Hash(otp + authSecret);
 
         ConfirmationEmail confirmationEmail = ConfirmationEmail.builder()
                 .token(token)
                 .type(MailType.REGISTRATION_CONFIRMATION)
-                .expiredAt(LocalDateTime.now().plusDays(1))
+                .expiredAt(EXP_TIME_REGISTRATION_EMAIL)
                 .userId(user.getId())
                 .build();
 
         confirmationEmailRepo.save(confirmationEmail);
 //        emailService.sendRegistrationEmail(user, token);
         // sending mail with kafka producer
-        authProducer.sendConfirmationRegistrationUser(new SendMailWithToken(
+        authProducer.sendConfirmationRegistrationUser(new SendMailWithOtpToken(
                 new RecipientInfo(
                         user.getEmail(),
                         user.getName()
                 ),
-                token
+                new OtpTokenOptional(
+                        otp,
+                        token
+                )
         ));
     }
 

@@ -23,6 +23,7 @@ public class ConfirmationEmail extends IdBaseEntity {
     // dont need to reference user object here ->
    private Long userId;
 
+   // token or ( otp + auth_secret hashing with sha 256)
     private String token;
 
     @Enumerated(EnumType.STRING)

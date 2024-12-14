@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nemisolv.lib.util.CommonUtil;
 import net.nemisolv.notificationservice.kafka.order.Product;
+import net.nemisolv.notificationservice.payload.OtpTokenOptional;
 import net.nemisolv.notificationservice.payload.RecipientInfo;
 import net.nemisolv.notificationservice.service.EmailService;
 import org.springframework.beans.factory.annotation.Value;
@@ -135,7 +136,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Async
-    public void sendRegistrationConfirmationEmail(RecipientInfo recipient, String token) throws MessagingException {
+    public void sendRegistrationConfirmationEmail(RecipientInfo recipient, OtpTokenOptional otpTokenOptional) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, UTF_8.name());
         messageHelper.setFrom(senderEmail);
@@ -143,9 +144,10 @@ public class EmailServiceImpl implements EmailService {
         final String templateName = CUSTOMER_REGISTRATION.getTemplate();
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("customerName", recipient.name());
-        String urlVerification = CommonUtil.buildEmailUrl("/verify-email", token);
+        variables.put("recipientName", recipient.name());
+        String urlVerification = CommonUtil.buildEmailUrl("/verify-email/with-token", otpTokenOptional.token());
         variables.put("url", urlVerification);
+        variables.put("otp", otpTokenOptional.otp());
 
         Context context = new Context();
         context.setVariables(variables);

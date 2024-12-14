@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmation Registration</title> <!-- Đổi tiêu đề thành Confirmation Registration -->
+    <title>Confirmation Registration</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #ffffff; color: #000000;">
 
@@ -18,12 +18,15 @@
                 </tr>
                 <tr>
                     <td style="padding: 20px 30px 40px 30px;">
-                        <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px;">Dear <span th:text="${customerName}"></span>,</p>
-                        <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px;">Thank you for registering an account with us. Your account information:</p>
-                        <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px;">To complete the registration process, please click the button below:</p>
-                        <p style="margin: 0; text-align: center;">
-                            <a th:href="${url}" style="background-color: #000000; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 4px; display: inline-block; font-weight: bold;">Confirm</a>
+                        <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px;">Dear <span th:text="${recipientName}"></span>,</p>
+                        <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 24px;">Thank you for registering an account with us.
+                        Enter the following OTP to verify your account.
                         </p>
+                        <h2 style="margin: 10px 0 20px 0; font-size: 20px; line-height: 28px; background-color: #f0f0f0; padding: 10px; border-radius: 4px; text-align: center;">OTP: <span th:text="${otp}"></span> </h2>
+                        <p style="margin: 0; text-align: center;">
+                            <a th:href="${url}" style="background-color: #000000; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 4px; display: inline-block; font-weight: bold;">Verify with Token</a>
+                        </p>
+                        <p style="margin: 10px 0 0 0; font-size: 14px; line-height: 20px; text-align: center; color: #666666;">(Click this button to verify your account instead of an OTP)</p>
                     </td>
                 </tr>
                 <tr>

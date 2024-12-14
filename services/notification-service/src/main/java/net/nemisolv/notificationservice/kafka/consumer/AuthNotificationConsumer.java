@@ -3,8 +3,7 @@ package net.nemisolv.notificationservice.kafka.consumer;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.nemisolv.notificationservice.kafka.identity.SendMailWithToken;
-import net.nemisolv.notificationservice.kafka.payment.PaymentConfirmation;
+import net.nemisolv.notificationservice.kafka.identity.SendMailWithOtpToken;
 import net.nemisolv.notificationservice.notification.Notification;
 import net.nemisolv.notificationservice.notification.NotificationRepository;
 import net.nemisolv.notificationservice.payload.RecipientInfo;
@@ -27,18 +26,18 @@ public class AuthNotificationConsumer {
     private final EmailService emailService;
 
     @KafkaListener(topics = "confirmation-registration-user-topic")
-    public void consumeConfirmationRegistrationUserNotifications(SendMailWithToken sendMailWithToken) throws MessagingException {
-        log.info(format("Consuming the message from confirmation-registration-user-topic Topic:: %s", sendMailWithToken.recipient()));
+    public void consumeConfirmationRegistrationUserNotifications(SendMailWithOtpToken sendMailWithOtpToken) throws MessagingException {
+        log.info(format("Consuming the message from confirmation-registration-user-topic Topic:: %s", sendMailWithOtpToken.recipient()));
         repository.save(
                 Notification.builder()
                         .type(CONFIRMATION_REGISTRATION_ACCOUNT)
                         .notificationDate(LocalDateTime.now())
-                        .recipientInfo(sendMailWithToken.recipient())
+                        .recipientInfo(sendMailWithOtpToken.recipient())
                         .build()
         );
         emailService.sendRegistrationConfirmationEmail(
-                sendMailWithToken.recipient(),
-                sendMailWithToken.token()
+                sendMailWithOtpToken.recipient(),
+                sendMailWithOtpToken.otpTokenOptional()
         );
     }
 

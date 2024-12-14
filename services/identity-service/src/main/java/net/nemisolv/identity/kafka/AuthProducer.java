@@ -2,7 +2,7 @@ package net.nemisolv.identity.kafka;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.nemisolv.identity.payload.auth.SendMailWithToken;
+import net.nemisolv.identity.payload.auth.SendMailWithOtpToken;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -15,21 +15,21 @@ import static org.springframework.kafka.support.KafkaHeaders.TOPIC;
 @RequiredArgsConstructor
 public class AuthProducer {
 
-    private final KafkaTemplate<String, SendMailWithToken> kafkaTemplate;
+    private final KafkaTemplate<String, SendMailWithOtpToken> kafkaTemplate;
 
-    public void sendConfirmationRegistrationUser(SendMailWithToken sendMailWithToken) {
+    public void sendConfirmationRegistrationUser(SendMailWithOtpToken sendMailWithOtpToken) {
         log.info("Sending confirmation registration user");
-        Message<SendMailWithToken> message = MessageBuilder
-                .withPayload(sendMailWithToken)
+        Message<SendMailWithOtpToken> message = MessageBuilder
+                .withPayload(sendMailWithOtpToken)
                 .setHeader(TOPIC, "confirmation-registration-user-topic")
                 .build();
         kafkaTemplate.send(message);
     }
 
-    public void sendForgotPasswordEmail(SendMailWithToken sendMailWithToken) {
+    public void sendForgotPasswordEmail(SendMailWithOtpToken sendMailWithOtpToken) {
         log.info("Sending forgot password email");
-        Message<SendMailWithToken> message = MessageBuilder
-                .withPayload(sendMailWithToken)
+        Message<SendMailWithOtpToken> message = MessageBuilder
+                .withPayload(sendMailWithOtpToken)
                 .setHeader(TOPIC, "forgot-password-email-topic")
                 .build();
     }

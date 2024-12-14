@@ -7,17 +7,24 @@ import lombok.RequiredArgsConstructor;
 import net.nemisolv.identity.payload.auth.*;
 import net.nemisolv.identity.service.AuthService;
 import net.nemisolv.lib.payload.ApiResponse;
+import net.nemisolv.lib.util.CommonUtil;
+import net.nemisolv.lib.util.CryptoUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.MessagingException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 public class AuthenticationController {
     private final AuthService authService;
+
+    @Value("${app.secure.auth_secret}")
+    private String authSecret;
 
     @PostMapping("/login")
     public ApiResponse<AuthenticationResponse> login(@RequestBody @Valid AuthenticationRequest authRequest) {
@@ -29,18 +36,23 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<Void> register(@RequestBody @Valid RegisterRequest authRequest) throws MessagingException {
+    public ApiResponse<Void> register(@RequestBody @Valid RegisterRequest authRequest) throws MessagingException, NoSuchAlgorithmException {
         authService.registerExternal(authRequest);
         return ApiResponse.success();
     }
 
-
-    @GetMapping("/verify-email")
-    public ApiResponse<Void> verifyEmail(@RequestParam String token) {
-        authService.verifyEmail(token);
-        return ApiResponse.success();
+    @PostMapping("/verify-email/with-otp")
+    public ApiResponse<Void> verifyEmailWithOtp(@RequestBody @Valid VerifyEmailWithOtpRequest request) throws NoSuchAlgorithmException {
+        String token = CryptoUtil.sha256Hash(request.otp()+ authSecret);
+         authService.verifyEmail(token);
+         return ApiResponse.success();
     }
 
+    @PostMapping("/verify-email/with-token")
+    public ApiResponse<Void> verifyEmailWithToken(@RequestBody @Valid VerifyEmailWithTokenRequest request) {
+        authService.verifyEmail(request.token());
+        return ApiResponse.success();
+    }
 
     @PostMapping("/forgot-password")
     public ApiResponse<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest forgotPasswordRequest) {

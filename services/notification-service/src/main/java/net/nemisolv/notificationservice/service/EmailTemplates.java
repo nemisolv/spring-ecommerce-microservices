@@ -7,7 +7,7 @@ public enum EmailTemplates {
     WELCOME_EMAIL("welcome-email.html", "Welcome to TechShop"),
     PAYMENT_CONFIRMATION("payment-confirmation.html", "Payment successfully processed"),
     ORDER_CONFIRMATION("order-confirmation.html", "Order confirmation"),
-    CUSTOMER_REGISTRATION("customer-registration.html", "Welcome to TechShop"),
+    CUSTOMER_REGISTRATION("customer-registration.html", "Confirmation Registration!"),
 
     PASSWORD_RESET("password/password-reset.html", "Password reset")
 
