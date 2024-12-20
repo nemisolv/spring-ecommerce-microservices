@@ -50,12 +50,6 @@ public class ProductController {
         return ApiResponse.success(productService.purchaseProducts(request));
     }
 
-
-
-
-
-
-
     @GetMapping("/categories/{categoryId}")
     public ApiResponse<PagedResponse<ProductOverviewResponse>> getProductsByCategory(@PathVariable Long categoryId,
                                                                                      @RequestParam(defaultValue = "1") int page,

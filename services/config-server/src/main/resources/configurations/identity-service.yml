@@ -38,6 +38,9 @@ spring:
   security:
     oauth2:
       client:
+        provider:
+          azure:
+            issuer-uri: https://login.microsoftonline.com/your-tenant-id/v2.0
         registration:
           google:
             clientId: 108748481333-q03ovpcihsp67ngr7d3apam9feolosgv.apps.googleusercontent.com
@@ -60,6 +63,7 @@ spring:
             scope:
               - user:email
               - read:user
+
 #          provider:
 #            facebook:
 #              authorizationUri: https://www.facebook.com/v3.0/dialog/oauth

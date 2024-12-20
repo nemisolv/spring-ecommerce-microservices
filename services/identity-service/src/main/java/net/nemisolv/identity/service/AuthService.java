@@ -18,7 +18,7 @@ public interface AuthService {
 
     void verifyEmail(String token) ;
 
-    void forgotPassword(String email);
+    void forgotPassword(String email) throws NoSuchAlgorithmException;
 
     void resetPassword(ResetPasswordRequest reset) ;
 

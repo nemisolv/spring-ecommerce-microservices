@@ -46,8 +46,10 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import static net.nemisolv.lib.util.Constants.EXP_TIME_PASSWORD_RESET_EMAIL;
 import static net.nemisolv.lib.util.Constants.EXP_TIME_REGISTRATION_EMAIL;
 
 @Service
@@ -70,6 +72,15 @@ public class AuthServiceImpl implements AuthService {
 
     // sending email
     private final AuthProducer authProducer;
+
+
+//    util
+
+    private static final Map<MailType, LocalDateTime> mailTypeToExp = Map.of(
+            MailType.REGISTRATION_CONFIRMATION, EXP_TIME_REGISTRATION_EMAIL,
+            MailType.PASSWORD_RESET, EXP_TIME_PASSWORD_RESET_EMAIL
+//            MailType.ORDER_CREATED_NOTIFICATION,
+    );
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authRequest) {
@@ -107,11 +118,11 @@ public class AuthServiceImpl implements AuthService {
         if (userRepo.existsByEmail(authRequest.getEmail())) {
             throw new BadCredentialException(ResultCode.USER_ALREADY_EXISTS);
         }
-        UserPrincipal currentUser  = AuthContext.getCurrentUser();
+        UserPrincipal currentUser = AuthContext.getCurrentUser();
 //        if(userPrincipal.getAuthorities() )
 
-            Role roleToAssign = roleRepo.findByName(authRequest.getRole())
-                    .orElseThrow(() -> new BadRequestException(ResultCode.ROLE_NOT_FOUND));
+        Role roleToAssign = roleRepo.findByName(authRequest.getRole())
+                .orElseThrow(() -> new BadRequestException(ResultCode.ROLE_NOT_FOUND));
 
         // Kiểm tra quyền của user hiện tại
         if (currentUser.getRole().getName().equals(RoleName.ADMIN)) {
@@ -175,33 +186,51 @@ public class AuthServiceImpl implements AuthService {
 //    }
 
     @Override
-    public void forgotPassword(String email) {
+    public void forgotPassword(String email) throws NoSuchAlgorithmException {
+        String token = CryptoUtil.sha256Hash(email + authSecret);
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+
+        ConfirmationEmail resetPasswordConfirmation = ConfirmationEmail.builder()
+                .userId(user.getId())
+                .token(token)
+                .type(MailType.PASSWORD_RESET)
+                .expiredAt(EXP_TIME_PASSWORD_RESET_EMAIL)
+                .build();
+
+        confirmationEmailRepo.save(resetPasswordConfirmation);
+
+
         // TODO: Implement email sending logic
+
+
         authProducer.sendForgotPasswordEmail(new SendMailWithOtpToken(
                 new RecipientInfo(
                         user.getName(),
                         user.getEmail()
                 ),
 
-                null
+                new OtpTokenOptional(
+                        null,
+                        token
+                )
 
         ));
     }
 
     @Override
     public void resetPassword(ResetPasswordRequest resetRequest) {
-//        ConfirmationEmail confirmationEmail = validateConfirmationEmail(resetRequest.getToken());
-//
-//        User user = userRepo.findById(confirmationEmail.getUserId())
-//                .orElseThrow(() -> new BadRequestException(ResultCode.USER_NOT_FOUND));
-//
-//        user.setPassword(passwordEncoder.encode(resetRequest.getNewPassword()));
-//        confirmationEmail.setConfirmedAt(LocalDateTime.now());
-//
-//        userRepo.save(user);
-//        confirmationEmailRepo.save(confirmationEmail);
+        String token = resetRequest.getToken();
+        String newPassword = resetRequest.getNewPassword();
+
+        ConfirmationEmail confirmationEmail = validateConfirmationEmail(token);
+        confirmationEmail.setConfirmedAt(LocalDateTime.now());
+
+        User user = userRepo.findById(confirmationEmail.getUserId()).orElseThrow();
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        confirmationEmailRepo.save(confirmationEmail);
+        userRepo.save(user);
 
     }
 
@@ -272,7 +301,6 @@ public class AuthServiceImpl implements AuthService {
     private User createUser(RegisterRequest authRequest, Role role) {
 
 
-
         return User.builder()
                 .email(authRequest.getEmail())
                 .username(userHelper.generateUsername(authRequest.getName(), ""))
@@ -324,6 +352,18 @@ public class AuthServiceImpl implements AuthService {
     private boolean isAssignableByManager(Role role) {
         List<String> allowedRolesForManager = List.of("STAFF", "ASSISTANT");
         return allowedRolesForManager.contains(role.getName().toString());
+    }
+
+    private void createAndSaveConfirmationEmail(Long userId, String token,MailType mailType) {
+        ConfirmationEmail confirmationEmail = ConfirmationEmail.builder()
+                .userId(userId)
+                .token(token)
+                .type(mailType)
+                .expiredAt(mailTypeToExp.get(mailType))
+                .build();
+
+        confirmationEmailRepo.save(confirmationEmail);
+        
     }
 
 }
