@@ -36,7 +36,7 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    private Date extractTokenExpire(String token) {
+    public Date extractTokenExpire(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
@@ -113,6 +113,9 @@ public class JwtService {
         }
         isValid = isValidToken(token, UserPrincipal.create(user.get()));
         return new IntrospectResponse(isValid);
+    }
 
+    public long getTokenExpireTime(String token) {
+        return extractTokenExpire(token).getTime();
     }
 }

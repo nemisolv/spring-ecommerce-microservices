@@ -145,7 +145,7 @@ public class EmailServiceImpl implements EmailService {
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("recipientName", recipient.name());
-        String urlVerification = CommonUtil.buildEmailUrl("/verify-email/with-token", otpTokenOptional.token());
+        String urlVerification = CommonUtil.buildEmailUrl("/auth/verify-email/request", otpTokenOptional.token());
         variables.put("url", urlVerification);
         variables.put("otp", otpTokenOptional.otp());
 
@@ -174,9 +174,9 @@ public class EmailServiceImpl implements EmailService {
         final String templateName = PASSWORD_RESET.getTemplate();
 
         Map<String, Object> variables = new HashMap<>();
-        variables.put("customerName", recipient.name());
-        String resetUrl = CommonUtil.buildEmailUrl("/reset-password", token);
-        variables.put("resetUrl", resetUrl);
+        variables.put("recipientName", recipient.name());
+        String resetUrl = CommonUtil.buildEmailUrl("/auth/reset-password/request/", token);
+        variables.put("url", resetUrl);
 
         Context context = new Context();
         context.setVariables(variables);

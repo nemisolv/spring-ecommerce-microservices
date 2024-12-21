@@ -17,55 +17,7 @@ import java.util.regex.Pattern;
 
 public class StringUtils extends StrUtil {
 
-    /**
-     * Phương thức mã hóa MD5
-     *
-     * @param str Chuỗi
-     * @return Chuỗi
-     */
-    public static String md5(String str) {
-        // Khai báo biến messageDigest để lưu trữ đối tượng MessageDigest, khởi tạo bằng null
-        MessageDigest messageDigest = null;
-        try {
-            // Khởi tạo đối tượng MessageDigest với thuật toán MD5
-            messageDigest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        // Mã hóa chuỗi bằng MD5 và lưu kết quả vào mảng byte
-        byte[] resultByte = messageDigest.digest(str.getBytes());
-        // Khởi tạo StringBuffer để lưu trữ chuỗi kết quả
-        StringBuffer result = new StringBuffer();
-        for (int i = 0; i < resultByte.length; ++i) {
-            int v = 0xFF & resultByte[i];
-            if (v < 16) {
-                result.append("0");
-            }
-            // Chuyển đổi giá trị byte thành chuỗi hex và thêm vào chuỗi kết quả
-            result.append(Integer.toHexString(v));
-        }
-        // Trả về chuỗi kết quả sau khi mã hóa
-        return result.toString();
-    }
 
-    /**
-     * Lấy số ngẫu nhiên
-     *
-     * @param n Số lần ngẫu nhiên
-     * @return
-     */
-    public static String getRandStr(int n) {
-        // Khởi tạo đối tượng Random để tạo ra các số ngẫu nhiên
-        Random random = new Random();
-        String sRand = "";
-        for (int i = 0; i < n; i++) {
-            String rand = String.valueOf(random.nextInt(10));
-            sRand += rand;
-        }
-        //Trả về chuỗi ngẫu nhiên đã được tạo
-        return sRand;
-    }
 
     /**
      * Cắt chuỗi, nếu vượt quá độ dài thì cắt

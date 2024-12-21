@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 public class ConfirmationEmail extends IdBaseEntity {
 
-    // dont need to reference user object here ->
+    // don't need to reference user object here ->
    private Long userId;
 
    // token or ( otp + auth_secret hashing with sha 256)

@@ -20,6 +20,8 @@ public class ErrorDTO {
     private List<String> errors = new ArrayList<>();
     private int code;
 
+    private Object data;
+
     public void addError(String error) {
         errors.add(error);
     }

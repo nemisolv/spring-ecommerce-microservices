@@ -36,7 +36,6 @@ import { InputPassword } from '@/components/ui/input-password';
 import { InputWithAdornments } from '@/components/ui/input-with-adornments';
 import { Routes } from '@/constants/routes';
 import { useZodForm } from '@/hooks/use-zod-form';
-import { AuthErrorCode,  mapAuthErrorCode } from '@/lib/auth/errors';
 import { cn } from '@/lib/utils';
 import {
   logInSchema,
@@ -44,6 +43,7 @@ import {
   from '@/schemas/auth/login-schema';
 import { continueWithGoogle, continueWithMicrosoft,  authenticate } from '@/actions/auth/authenticatation';
 import ErrorResponse from '@/schemas/ErrorResponse';
+import { ResultCode, ResultCodeMessages } from '@/constants/api-result-code';
 import { useRouter } from 'next/navigation';
 
 
@@ -51,12 +51,12 @@ import { useRouter } from 'next/navigation';
 export function LoginCard(props: CardProps): React.JSX.Element {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [errorMessage, setErrorMessage] = React.useState<string>();
+  const router = useRouter();
   // currently, for automatic verify purpose but not impl
   const [unverifiedEmail, setUnverifiedEmail] = React.useState<
-    string | undefined
+  string | undefined
   >();
 
-  const router = useRouter();
 
   const methods = useZodForm({
     schema: logInSchema,
@@ -71,23 +71,22 @@ export function LoginCard(props: CardProps): React.JSX.Element {
     if (!canSubmit) {
       return;
     }
-    setIsLoading(true);
     try {
-       await authenticate(values) 
+      setIsLoading(true);
+      const result = await authenticate(values) 
+      console.log("🚀 ~ onSubmit ~ result::", result)
+      
       router.push(Routes.Home)
      
 
     }catch(e) {
-      if(e instanceof ErrorResponse) {
-        const errorCode = e.code as AuthErrorCode;
-        setUnverifiedEmail(
-          errorCode === AuthErrorCode.USER_EMAIL_NOT_VERIFIED ? e.errors[0] : undefined
-        );
-        setErrorMessage(
-          mapAuthErrorCode(e.code)
-        );
-      }
-      toast.error("Couldn't log in");
+      const errorData = e.data as ErrorResponse;
+      console.log("🚀 ~ onSubmit ~ errorData::", errorData)
+      const {code} = errorData;
+      if(!code) return 
+        // if not verified => auto verify
+        setUnverifiedEmail(code === ResultCode.EMAIL_NOT_VERIFIED ? values.email : undefined);
+        setErrorMessage(ResultCodeMessages[code in ResultCodeMessages ? code as ResultCode : ResultCode.UNKNOWN_ERROR]);
     }finally {
       setIsLoading(false)
     }
@@ -198,6 +197,7 @@ export function LoginCard(props: CardProps): React.JSX.Element {
                           buttonVariants({ variant: 'link' }),
                           'ml-0.5 h-fit gap-0.5 px-0.5 py-0 text-foreground underline'
                         )}
+                        // auto redirect to verify email page -> but not send OTP, user need to click 'resend' -> my logic business
                         href={`${Routes.VerifyEmail}?email=${encodeURIComponent(unverifiedEmail)}`}
                       >
                         Verify email

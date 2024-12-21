@@ -2,8 +2,7 @@
 export interface RegisterParams {
     email: string;
     password: string;
-    firstName: string;
-    lastName: string;
+    name: string;
 }
 
 export interface LoginParams {
@@ -27,7 +26,6 @@ export interface ForgotPasswordParams {
 }
 
 export interface ResetPasswordParams {
-    email: string;
     password: string;
     token: string;
 }
@@ -39,17 +37,17 @@ export enum Role {
     CUSTOMER = 'CUSTOMER',
 }
 
-export interface RoleResponse {
-    id: number;                  // id là một số (Long -> number trong TypeScript)
-    name: Role               // name là chuỗi
-    permissions: Set<string>;    // permissions là một Set chứa các chuỗi
-}
+// export interface RoleResponse {
+//     id: number;                  // id là một số (Long -> number trong TypeScript)
+//     name: Role               // name là chuỗi
+//     permissions: Set<string>;    // permissions là một Set chứa các chuỗi
+// }
 
 
 
 
 export interface ApiResponse<T> {
-    success: boolean;
+    code: number;
     message?: string;
     countRecord?: number;
     data: T;
@@ -64,20 +62,31 @@ export interface TokenResponse extends ApiResponse<TokenResponse> {
     refreshTokenExpiry: number;
 }
 
+
+
+export interface LoginSuccessResponse extends ApiResponse<LoginSuccessResponse> {
+    userData: FullInfoUser;
+    accessToken: string;
+    refreshToken: string;
+    accessTokenExpiry: number;
+    refreshTokenExpiry: number;
+}
+
+
 export interface FullInfoUser {
     id: number;
     username: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    name: string;
     emailVerified: boolean;
     imgUrl: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    role: any,
+    phoneNumber: string;
+    role: RoleResponse;
     authProvider: string;
 }
 
-export interface LoginSuccessResponse extends ApiResponse<LoginSuccessResponse> {
-    token: TokenResponse;
-    userData: FullInfoUser;
+export interface RoleResponse {
+    id: number;
+    name: string;
+    permissions: Set<string>;
 }

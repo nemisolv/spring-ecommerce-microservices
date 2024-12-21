@@ -18,7 +18,7 @@ import java.util.Collection;
 public class ApiResponse<T> {
     private int  code;
     private String message;
-    private Integer count;
+    private Integer countRecord;
     private T data;
 
     public static <T> ApiResponse<T> success(T data) {
@@ -26,7 +26,7 @@ public class ApiResponse<T> {
         return ApiResponse.<T>builder()
                 .code(ResultCode.SUCCESS.code())
                 .data(data)
-                .count(data instanceof Collection ? ((Collection<?>) data).size() : null)
+                .countRecord(data instanceof Collection ? ((Collection<?>) data).size() : null)
                 .build();
     }
 

@@ -3,11 +3,14 @@ import { axiosInstance } from "@/lib/axios.config";
 import { getBaseUrl } from "@/lib/urls/get-base-url";
 import { VerifyEmailWithOtpSchema } from "@/schemas/auth/verify-email-with-otp-schema";
 import { VerifyEmailWithTokenSchema } from "@/schemas/auth/verify-email-with-token-schema";
-import { LoginParams, ResendEmailConfirmationParams, SignUpParams } from "@/types/auth";
+import { ApiResponse, ForgotPasswordParams, LoginParams, LoginSuccessResponse, ResendEmailConfirmationParams, ResetPasswordParams, SignUpParams } from "@/types/auth";
+import { saveAuth, saveTokens } from "@/util/authUtil";
 
 export const authenticate = async (params: LoginParams) => {
-    const response = await axiosInstance.post('/auth/login', params);
-    console.log(response);
+    const response = await axiosInstance.post('/auth/login', params) as ApiResponse<LoginSuccessResponse>;
+    const { userData, ...onlyTokenResponse } = response.data;
+    saveTokens(onlyTokenResponse);
+    saveAuth(userData);
     return response;
 }
 
@@ -43,6 +46,15 @@ export const verifyEmailWithOtp = async(params: VerifyEmailWithOtpSchema) => {
 
 export const verifyEmailWithToken = async(params: VerifyEmailWithTokenSchema) => {
     await axiosInstance.post('/auth/verify-email/with-token', params);
+}
+
+export const sendResetPasswordInstructions = async(params: ForgotPasswordParams) =>  {
+    await axiosInstance.post('/auth/forgot-password', params);
+    // backend will send email with token
+}
+
+export const resetPassword = async (params: ResetPasswordParams) => {
+    await axiosInstance.post('/auth/reset-password', params);
 }
 
 

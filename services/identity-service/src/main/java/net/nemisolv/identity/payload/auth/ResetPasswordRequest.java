@@ -13,6 +13,6 @@ public class ResetPasswordRequest {
     private String token;
     @NotBlank(message = "New password is required")
     @Length(min = 6, message = "Password must be at least 6 characters")
-    private String newPassword;
+    private String password;
 
 }

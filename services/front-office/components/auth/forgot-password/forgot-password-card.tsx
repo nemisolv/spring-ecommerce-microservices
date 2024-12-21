@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AlertCircleIcon, MailIcon } from 'lucide-react';
 import { type SubmitHandler } from 'react-hook-form';
-
-import { sendResetPasswordInstructions } from '@/actions/auth/send-reset-password-instructions';
+import { sendResetPasswordInstructions } from '@/actions/auth/authenticatation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -51,12 +50,14 @@ export function ForgotPasswordCard(props: CardProps): React.JSX.Element {
     if (!canSubmit) {
       return;
     }
-    const result = await sendResetPasswordInstructions(values);
-    if (!result?.serverError && !result?.validationErrors) {
-      setErrorMessage(undefined);
+    try {
+     await sendResetPasswordInstructions(values);
+
       router.replace(`${Routes.ForgotPasswordSuccess}?email=${values.email}`);
-    } else {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    }catch(e) {
       setErrorMessage("Couldn't request password change");
+
     }
   };
   return (
@@ -64,7 +65,7 @@ export function ForgotPasswordCard(props: CardProps): React.JSX.Element {
       <CardHeader>
         <CardTitle>Forgot your password?</CardTitle>
         <CardDescription>
-          No worries! We'll send you a link with instructions on how to reset
+          No worries! We&apos;ll send you a link with instructions on how to reset
           your password.
         </CardDescription>
       </CardHeader>

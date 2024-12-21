@@ -1,4 +1,4 @@
-import { TokenResponse } from '@/types/auth';
+import { FullInfoUser, TokenResponse } from '@/types/auth';
 import Cookies from 'js-cookie';
 
 
@@ -39,6 +39,11 @@ export const getAuth = () => {
       return { user: undefined };
     }
   };
+
+
+export const saveAuth = (userData:FullInfoUser )=> {
+  Cookies.set(USER_DATA, JSON.stringify(userData), {secure: process.env.NODE_ENV === 'production'}); // secure: true in production
+}
 
 export const logOut = () => {
  

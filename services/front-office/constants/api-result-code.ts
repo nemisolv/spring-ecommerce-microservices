@@ -7,6 +7,7 @@ export enum ResultCode {
     METHOD_ARGUMENT_NOT_VALID = 4002,
     ILLEGAL_ARGUMENT = 4003,
     RESOURCE_NOT_FOUND = 4004,
+    UNKNOWN_ERROR = 4005,
 
     // General errors
     SERVER_BUSY = 400,
@@ -21,6 +22,7 @@ export enum ResultCode {
     EMPLOYEE_DISABLED = 20031,
     USER_NOT_FOUND_OR_DISABLED = 20002,
     USER_ALREADY_EXISTS = 20003,
+    TOKEN_RESET_PASSWORD_USED = 20018,
 
     // Authorization errors
     INVALID_TOKEN = 20007,
@@ -100,9 +102,11 @@ export const ResultCodeMessages: Record<ResultCode, string> = {
     [ResultCode.METHOD_ARGUMENT_NOT_VALID]: "Method argument not valid",
     [ResultCode.ILLEGAL_ARGUMENT]: "Illegal argument",
     [ResultCode.RESOURCE_NOT_FOUND]: "Resource not found",
+    [ResultCode.UNKNOWN_ERROR]: "Something went wrong",
 
     // General errors
     [ResultCode.SERVER_BUSY]: "Server is busy, please try again later",
+
 
     // User-related errors
     [ResultCode.USER_SESSION_EXPIRED]: "User session has expired, please log in again",
@@ -114,6 +118,7 @@ export const ResultCodeMessages: Record<ResultCode, string> = {
     [ResultCode.EMPLOYEE_DISABLED]: "Employee has been disabled",
     [ResultCode.USER_NOT_FOUND_OR_DISABLED]: "User does not exist or account is disabled",
     [ResultCode.USER_ALREADY_EXISTS]: "User already exists",
+    [ResultCode.TOKEN_RESET_PASSWORD_USED]: "Token for resetting password has been used",
 
     // Authorization errors
     [ResultCode.INVALID_TOKEN]: "Invalid token",

@@ -4,11 +4,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.nemisolv.identity.exception.BadRequestException;
 import net.nemisolv.identity.payload.auth.*;
 import net.nemisolv.identity.service.AuthService;
 import net.nemisolv.lib.payload.ApiResponse;
 import net.nemisolv.lib.util.CommonUtil;
 import net.nemisolv.lib.util.CryptoUtil;
+import net.nemisolv.lib.util.ResultCode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.MessagingException;
@@ -50,8 +52,8 @@ public class AuthenticationController {
 
     @PostMapping("/verify-email/with-token")
     public ApiResponse<Void> verifyEmailWithToken(@RequestBody @Valid VerifyEmailWithTokenRequest request) {
-        authService.verifyEmail(request.token());
-        return ApiResponse.success();
+            authService.verifyEmail(request.token());
+            return ApiResponse.success();
     }
 
 
@@ -77,7 +79,7 @@ public class AuthenticationController {
 
     // handle for forgot password
     @PostMapping("/reset-password")
-    public ApiResponse<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ApiResponse<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
         authService.resetPassword(request);
         return ApiResponse.success();
     }

@@ -31,6 +31,7 @@ import net.nemisolv.lib.core._enum.RoleName;
 import net.nemisolv.lib.util.CommonUtil;
 import net.nemisolv.lib.util.CryptoUtil;
 import net.nemisolv.lib.util.ResultCode;
+import net.nemisolv.lib.util.TokenUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.messaging.MessagingException;
@@ -46,7 +47,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static net.nemisolv.lib.util.Constants.*;
@@ -188,9 +188,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void forgotPassword(String email) throws NoSuchAlgorithmException {
-        String token = CryptoUtil.sha256Hash(email + authSecret);
+// don't use sha256hash because it is the same output in any cases
+//        String token = CryptoUtil.sha256Hash(email + authSecret);
+        String token = TokenUtil.generateRandomToken();
         User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
+                // don't leak information about whether the email exists or not, just throw common exception
+                .orElseThrow(() -> new BadRequestException(ResultCode.BAD_REQUEST));
 
         ConfirmationEmail resetPasswordConfirmation = ConfirmationEmail.builder()
                 .userId(user.getId())
@@ -199,6 +202,16 @@ public class AuthServiceImpl implements AuthService {
                 .expiredAt(getExpTimePasswordResetEmail())
                 .build();
 
+
+        // revoke all previous reset password tokens
+        confirmationEmailRepo.findByTypeAndUserId(MailType.PASSWORD_RESET, user.getId())
+                .forEach(confirmationEmail -> {
+                    confirmationEmail.setRevoked(true);
+                    confirmationEmailRepo.save(confirmationEmail);
+                });
+
+
+
         confirmationEmailRepo.save(resetPasswordConfirmation);
 
 
@@ -206,15 +219,15 @@ public class AuthServiceImpl implements AuthService {
 
 
         authProducer.sendForgotPasswordEmail(new SendMailWithOtpToken(
-                new RecipientInfo(
-                        user.getName(),
-                        user.getEmail()
-                ),
-
-                new OtpTokenOptional(
-                        null,
-                        token
-                )
+                RecipientInfo.builder()
+                        .email(user.getEmail())
+                        .name(user.getName())
+                        .build()
+                ,
+                OtpTokenOptional.builder()
+                        .otp(null)
+                        .token(token)
+                        .build()
 
         ));
     }
@@ -222,12 +235,13 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void resetPassword(ResetPasswordRequest resetRequest) {
         String token = resetRequest.getToken();
-        String newPassword = resetRequest.getNewPassword();
+        String newPassword = resetRequest.getPassword();
 
         ConfirmationEmail confirmationEmail = validateConfirmationEmail(token);
         confirmationEmail.setConfirmedAt(LocalDateTime.now());
 
-        User user = userRepo.findById(confirmationEmail.getUserId()).orElseThrow();
+        User user = userRepo.findById(confirmationEmail.getUserId())
+                .orElseThrow(() -> new BadRequestException(ResultCode.USER_NOT_FOUND_OR_DISABLED));
 
         user.setPassword(passwordEncoder.encode(newPassword));
         confirmationEmailRepo.save(confirmationEmail);
@@ -273,10 +287,15 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepo.findByEmail(userPrincipal.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+        String token = jwtService.generateToken(userPrincipal);
+        String refreshToken = jwtService.generateRefreshToken(userPrincipal);
+
         return AuthenticationResponse.builder()
                 .userData(userMapper.toFullUserInfo(user))
-                .accessToken(jwtService.generateToken(userPrincipal))
-                .refreshToken(jwtService.generateRefreshToken(userPrincipal))
+                .accessToken(token)
+                .refreshToken(refreshToken)
+                .accessTokenExpiry(jwtService.extractTokenExpire(token).getTime())
+                .refreshTokenExpiry(jwtService.extractTokenExpire(refreshToken).getTime())
                 .build();
     }
 
@@ -329,7 +348,7 @@ public class AuthServiceImpl implements AuthService {
 
         return User.builder()
                 .email(authRequest.getEmail())
-                .username(userHelper.generateUsername(authRequest.getName(), ""))
+                .username(userHelper.generateUsername(authRequest.getName()))
                 .password(passwordEncoder.encode(authRequest.getPassword()))
                 .name(authRequest.getName())
                 .emailVerified(false)
@@ -360,7 +379,11 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException(ResultCode.TOKEN_EXPIRED);
         }
         if(confirmationEmail.getConfirmedAt() != null) {
+            if(confirmationEmail.getType() == MailType.REGISTRATION_CONFIRMATION) {
             throw new BadRequestException(ResultCode.EMAIL_ALREADY_VERIFIED);
+            }else if(confirmationEmail.getType() == MailType.PASSWORD_RESET) {
+                    throw new BadRequestException(ResultCode.TOKEN_RESET_PASSWORD_USED);
+            }
         }
 
         if (confirmationEmail.isRevoked()

@@ -42,19 +42,19 @@ public class AuthNotificationConsumer {
     }
 
 
-    @KafkaListener(topics = "forgot-password-email-topic")
-    public void consumeForgotPasswordNotifications(RecipientInfo recipient, String urlToken) throws MessagingException {
-        log.info(format("Consuming the message from forgot-password-email-topic Topic:: %s", recipient));
+    @KafkaListener(topics = "password-reset-email-topic")
+    public void consumeForgotPasswordNotifications(SendMailWithOtpToken sendMailWithOtpToken) throws MessagingException {
+        log.info(format("Consuming the message from forgot-password-email-topic Topic:: %s", sendMailWithOtpToken));
         repository.save(
                 Notification.builder()
                         .type(FORGOT_PASSWORD)
                         .notificationDate(LocalDateTime.now())
-                        .recipientInfo(recipient)
+                        .recipientInfo(sendMailWithOtpToken.recipient())
                         .build()
         );
         emailService.sendPasswordResetEmail(
-                recipient,
-                urlToken
+                sendMailWithOtpToken.recipient(),
+                sendMailWithOtpToken.otpTokenOptional().token()
         );
     }
 

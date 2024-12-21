@@ -1,11 +1,10 @@
 'use client';
 
 import * as React from 'react';
-import { formatDistanceToNow } from 'date-fns';
 import { AlertCircleIcon, LockIcon } from 'lucide-react';
 import { type SubmitHandler } from 'react-hook-form';
 
-import { resetPassword } from '@/actions/auth/reset-password';
+import { resetPassword } from '@/actions/auth/authenticatation';
 import { PasswordRequirementList } from '@/components/auth/password-requirement-list';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -31,23 +30,25 @@ import {
   resetPasswordSchema,
   type ResetPasswordSchema
 } from '@/schemas/auth/reset-password-schema';
+import { ResultCode } from '@/constants/api-result-code';
+import { useRouter } from 'next/navigation';
+import { Routes } from '@/constants/routes';
 
 export type ResetPasswordCardProps = CardProps & {
-  requestId: string;
-  expires: Date;
+  token: string;
 };
 
 export function ResetPasswordCard({
-  requestId,
-  expires,
+  token,
   ...other
 }: ResetPasswordCardProps): React.JSX.Element {
   const [errorMessage, setErrorMessage] = React.useState<string>();
+  const router = useRouter();
   const methods = useZodForm({
     schema: resetPasswordSchema,
     mode: 'onSubmit',
     defaultValues: {
-      requestId,
+      token,
       password: ''
     }
   });
@@ -57,10 +58,18 @@ export function ResetPasswordCard({
     if (!canSubmit) {
       return;
     }
-    const result = await resetPassword(values);
-    if (result?.serverError || result?.validationErrors) {
-      setErrorMessage("Couldn't reset password.");
+   try {
+    await resetPassword(values);
+    router.replace(Routes.ResetPasswordSuccess);
+  }catch(e) {
+    console.log("🚀 ~ constonSubmit:SubmitHandler<ResetPasswordSchema>= ~ e::", e)
+    const {code} = e.data;
+     if(code === ResultCode.TOKEN_EXPIRED) {
+      router.replace(Routes.ResetPasswordExpired);
+    }else {
+      setErrorMessage("Couldn't reset password");
     }
+    } 
   };
   return (
     <FormProvider {...methods}>
@@ -69,7 +78,7 @@ export function ResetPasswordCard({
           <CardTitle>Reset your password</CardTitle>
           <CardDescription suppressHydrationWarning>
             Use the form below to change your password. This request will expire
-            in {expires ? formatDistanceToNow(expires) : ''}.
+            soon, so make sure to complete it as soon as possible.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -81,7 +90,7 @@ export function ResetPasswordCard({
               type="hidden"
               className="hidden"
               disabled={methods.formState.isSubmitting}
-              {...methods.register('requestId')}
+              {...methods.register('token')}
             />
             <FormField
               control={methods.control}

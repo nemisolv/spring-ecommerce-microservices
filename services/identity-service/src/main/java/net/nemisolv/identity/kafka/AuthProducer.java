@@ -30,8 +30,9 @@ public class AuthProducer {
         log.info("Sending forgot password email");
         Message<SendMailWithOtpToken> message = MessageBuilder
                 .withPayload(sendMailWithOtpToken)
-                .setHeader(TOPIC, "forgot-password-email-topic")
+                .setHeader(TOPIC, "password-reset-email-topic")
                 .build();
+        kafkaTemplate.send(message);
     }
 
 }

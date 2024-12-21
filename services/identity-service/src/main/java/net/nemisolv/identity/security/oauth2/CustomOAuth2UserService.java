@@ -74,7 +74,7 @@ private final RoleRepository roleRepo;
 
         user.setName(oauth2UserInfo.getName());
         user.setEmail(oauth2UserInfo.getEmail());
-        String username = userHelper.generateUsername(oauth2UserInfo.getName(),"");
+        String username = userHelper.generateUsername(oauth2UserInfo.getName());
         user.setUsername(username);
         user.setEmailVerified(true);
         user.setAuthProvider(AuthProvider.getEnum(userRequest.getClientRegistration().getRegistrationId()));

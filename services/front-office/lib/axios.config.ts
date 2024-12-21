@@ -1,10 +1,18 @@
 
+import { Routes } from '@/constants/routes';
 import { TokenResponse } from '@/types/auth';
 import { getToken, logOut, saveTokens } from '@/util/authUtil';
 import axios from 'axios';
+
+
+const publicApiEndpoint = [
+    Routes.Login,
+    Routes.SignUp
+]
+
+
+
 export const axiosInstance = axios.create({
-
-
 
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}${process.env.NEXT_PUBLIC_BACKEND_API_VERSION}`,
     
@@ -31,6 +39,11 @@ axiosInstance.interceptors.response.use(
     res => res.data,
     async (error) => {
         const originalRequest = error.config;
+        console.log("🚀 ~ originalRequest::", originalRequest)
+        if(publicApiEndpoint.includes(originalRequest.url)) {
+            return Promise.reject(error.response);
+        }
+
         if (error.response && error.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             const { refreshToken } = getToken();
@@ -53,3 +66,4 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(error.response);
     }
 )
+

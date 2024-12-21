@@ -13,6 +13,7 @@ public enum ResultCode {
 
     // General errors
     SERVER_BUSY(400, "Server is busy, please try again later"),
+    BAD_REQUEST(400, "Bad request"),
 
     // User-related errors
     USER_SESSION_EXPIRED(20004, "User session has expired, please log in again"),
@@ -31,7 +32,8 @@ public enum ResultCode {
     TOKEN_EXPIRED(20006, "Token has expired"),
 
     PERMISSION_ALREADY_ASSIGNED(20016, "Permission already assigned to role"),
-    EMAIL_ALREADY_VERIFIED(20017     , "Email already verified"),
+    EMAIL_ALREADY_VERIFIED(20017, "Email already verified"),
+    TOKEN_RESET_PASSWORD_USED(20018, "Token for resetting password has been used"),
 
     // Customer-related errors
     CUSTOMER_NOT_FOUND(20012, "Customer does not exist"),
