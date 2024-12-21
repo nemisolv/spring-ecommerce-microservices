@@ -55,6 +55,18 @@ public class AuthenticationController {
     }
 
 
+    @PostMapping("/resend-email-confirmation")
+    public ApiResponse<Void> resendEmailConfirmation(@RequestBody @Valid ResendEmailConfirmationRequest request) throws MessagingException, NoSuchAlgorithmException {
+        authService.resendEmailConfirmation(request);
+        return ApiResponse.success();
+    }
+
+
+
+
+
+
+
     // flow: client send a request to /forgot-password, then the server will send an email to the user with a token link or otp
     @PostMapping("/forgot-password")
     public ApiResponse<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest forgotPasswordRequest) throws NoSuchAlgorithmException {

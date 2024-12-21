@@ -1,4 +1,4 @@
-package net.nemisolv.lib.core.exception;
+package net.nemisolv.identity.exception;
 
 
 import javax.naming.AuthenticationException;

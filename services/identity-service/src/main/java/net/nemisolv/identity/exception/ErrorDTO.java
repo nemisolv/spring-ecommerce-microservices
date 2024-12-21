@@ -1,12 +1,10 @@
-package net.nemisolv.lib.core.exception;
+package net.nemisolv.identity.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Getter

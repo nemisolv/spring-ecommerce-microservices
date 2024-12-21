@@ -43,8 +43,8 @@ public class GlobalHandlerException extends ResponseEntityExceptionHandler {
     @ResponseBody
     public ErrorDTO handleGenericException(HttpServletRequest request, Exception ex) {
         log.error("Request: {} raised exception: {}", request.getRequestURL(), ex.getMessage(), ex);
-        return buildErrorDTO(request, ResultCode.INTERNAL_SERVER_ERROR,
-                List.of(ResultCode.INTERNAL_SERVER_ERROR.message()));
+        return buildErrorDTO(request, ResultCode.SERVER_INTERNAL_ERROR,
+                List.of(ResultCode.SERVER_INTERNAL_ERROR.message()));
     }
 
     @ExceptionHandler(BadCredentialException.class)
@@ -66,7 +66,8 @@ public class GlobalHandlerException extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+    @NonNull
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(@NonNull MethodArgumentNotValidException ex,
                                                                   @NonNull HttpHeaders headers,
                                                                   @NonNull HttpStatusCode status,
                                                                   @NonNull WebRequest request) {

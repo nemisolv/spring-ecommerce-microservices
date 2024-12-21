@@ -47,7 +47,7 @@ public class ApiResponse<T> {
 
     public static <T> ApiResponse<T> error(String message) {
         return ApiResponse.<T>builder()
-                .code(ResultCode.INTERNAL_SERVER_ERROR.code())
+                .code(ResultCode.SERVER_INTERNAL_ERROR.code())
                 .message(message)
                 .build();
     }

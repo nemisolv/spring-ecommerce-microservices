@@ -47,7 +47,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         if(redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
             try {
-                throw new BadRequestException(ResultCode.ERROR);
+                throw new BadRequestException(ResultCode.SERVER_BUSY);
             } catch (BadRequestException e) {
                 throw new RuntimeException(e);
             }

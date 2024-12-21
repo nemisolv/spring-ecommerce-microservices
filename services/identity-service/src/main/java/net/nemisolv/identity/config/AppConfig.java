@@ -25,7 +25,7 @@ public class AppConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return email -> {
-            User user = userRepo.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException(ResultCode.USER_NOT_FOUND));
+            User user = userRepo.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException(ResultCode.USER_NOT_FOUND_OR_DISABLED));
             return UserPrincipal.create(user);
         };
     }

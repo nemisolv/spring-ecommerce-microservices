@@ -135,14 +135,14 @@ public class ProductServiceImpl implements ProductService {
 
         var storedProducts = productRepository.findAllByIdInOrderById(productIds);
         if (productIds.size() != storedProducts.size()) {
-            throw new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_ERROR,"One or more products does not exist");
+            throw new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_FAILED,"One or more products does not exist");
         }
 
         // check stock in Inventory
         var stockMap = inventoryClient.checkStock(productIds);
         for(var req: request) {
             if(stockMap.get(req.productId()) < req.quantity()) {
-                throw new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_ERROR,"Insufficient stock quantity for product with ID:: " + req.productId());
+                throw new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_FAILED,"Insufficient stock quantity for product with ID:: " + req.productId());
             }
         }
 
@@ -151,7 +151,7 @@ public class ProductServiceImpl implements ProductService {
             var product = storedProducts.stream()
                     .filter(p -> p.getId().equals(req.productId()))
                     .findFirst()
-                    .orElseThrow(() -> new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_ERROR,"Product not found"));
+                    .orElseThrow(() -> new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_FAILED,"Product not found"));
             product.setQuantity(product.getQuantity() - req.quantity());
         });
 
@@ -171,7 +171,7 @@ public class ProductServiceImpl implements ProductService {
                     var req = request.stream()
                             .filter(r -> r.productId().equals(product.getId()))
                             .findFirst()
-                            .orElseThrow(() -> new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_ERROR,"Product not found"));
+                            .orElseThrow(() -> new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_FAILED,"Product not found"));
                     return productMapper.toproductPurchaseResponse(product, req.quantity());
                 })
                 .toList();

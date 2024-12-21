@@ -1,4 +1,4 @@
-package net.nemisolv.lib.core.exception;
+package net.nemisolv.identity.exception;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +21,6 @@ public class PermissionException extends RuntimeException {
 
     public PermissionException(String message) {
         super(message);
-        this.resultCode = ResultCode.USER_PERMISSION_ERROR;
+        this.resultCode = ResultCode.INSUFFICIENT_PERMISSIONS;
     }
 }

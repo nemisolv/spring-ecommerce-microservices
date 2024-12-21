@@ -23,5 +23,7 @@ public interface AuthService {
     void resetPassword(ResetPasswordRequest reset) ;
 
     IntrospectResponse introspectToken(IntrospectRequest request);
+
+    void resendEmailConfirmation(ResendEmailConfirmationRequest request);
 }
 

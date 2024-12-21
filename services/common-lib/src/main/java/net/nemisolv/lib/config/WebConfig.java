@@ -15,9 +15,8 @@ public class WebConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-//        config.setAllowCredentials(true);
+        config.setAllowCredentials(true);
         config.addAllowedOrigin("*"); // Allow requests from this origin
-//        config.
         config.addAllowedHeader("*");
         config.addAllowedMethod("OPTIONS");
         config.addAllowedMethod("GET");
@@ -25,7 +24,7 @@ public class WebConfig {
         config.addAllowedMethod("PUT");
         config.addAllowedMethod("PATCH");
         config.addAllowedMethod("DELETE");
-        config.setMaxAge(3600l);
+        config.setMaxAge(3600L);
         source.registerCorsConfiguration("/api/**", config);
         return new CorsFilter(source);
     }

@@ -146,7 +146,7 @@ public class PermissionServiceImpl implements PermissionService {
         UserPrincipal currentUser = AuthContext.getCurrentUser();
 
         if (currentUser == null || !AccessHelper.isAccessAllowed(PermissionName.ASSIGN_ROLE)) {
-            throw new PermissionException(ResultCode.USER_PERMISSION_ERROR,"Permission denied to assign role permissions.");
+            throw new PermissionException(ResultCode.INSUFFICIENT_PERMISSIONS,"Permission denied to assign role permissions.");
         }
 
         Role role = roleRepository.findById(roleId)
@@ -164,7 +164,7 @@ public class PermissionServiceImpl implements PermissionService {
         if (currentUser.getRole().getName() == RoleName.ADMIN) {
             // check if role also is admin, if so, throw exception
             if(role.getName() == RoleName.ADMIN) {
-                throw new PermissionException(ResultCode.USER_PERMISSION_ERROR,"You are admin with all permissions, you cannot update permissions for admin role.");
+                throw new PermissionException(ResultCode.INSUFFICIENT_PERMISSIONS,"You are admin with all permissions, you cannot update permissions for admin role.");
             }
 
 
@@ -174,7 +174,7 @@ public class PermissionServiceImpl implements PermissionService {
             // a manager can't update permissions for admin, manager, You can only update for roles below your role
             if(role.getName() == RoleName.ADMIN || role.getName() == RoleName.MANAGER) {
                 throw new PermissionException(
-                        ResultCode.USER_PERMISSION_ERROR,"You are manager with limited permissions," +
+                        ResultCode.INSUFFICIENT_PERMISSIONS,"You are manager with limited permissions," +
                         " you cannot update permissions for admin or manager role.");
             }
 

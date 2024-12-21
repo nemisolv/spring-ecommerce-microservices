@@ -9,6 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import net.nemisolv.identity.entity.ConfirmationEmail;
 import net.nemisolv.identity.entity.Role;
 import net.nemisolv.identity.entity.User;
+import net.nemisolv.identity.exception.BadCredentialException;
+import net.nemisolv.identity.exception.BadRequestException;
+import net.nemisolv.identity.exception.PermissionException;
+import net.nemisolv.identity.exception.ResourceNotFoundException;
 import net.nemisolv.identity.helper.UserHelper;
 import net.nemisolv.identity.kafka.AuthProducer;
 import net.nemisolv.identity.mapper.UserMapper;
@@ -24,10 +28,6 @@ import net.nemisolv.identity.service.JwtService;
 import net.nemisolv.lib.core._enum.AuthProvider;
 import net.nemisolv.lib.core._enum.MailType;
 import net.nemisolv.lib.core._enum.RoleName;
-import net.nemisolv.lib.core.exception.BadCredentialException;
-import net.nemisolv.lib.core.exception.BadRequestException;
-import net.nemisolv.lib.core.exception.PermissionException;
-import net.nemisolv.lib.core.exception.ResourceNotFoundException;
 import net.nemisolv.lib.util.CommonUtil;
 import net.nemisolv.lib.util.CryptoUtil;
 import net.nemisolv.lib.util.ResultCode;
@@ -91,13 +91,13 @@ public class AuthServiceImpl implements AuthService {
 
             UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
             if (!userPrincipal.isEmailVerified()) {
-                throw new BadCredentialException(ResultCode.USER_EMAIL_NOT_VERIFIED, "Email not verified");
+                throw new BadCredentialException(ResultCode.EMAIL_NOT_VERIFIED, "Email not verified");
             }
 
             return generateAuthResponse(userPrincipal);
 
         } catch (AuthenticationException ex) {
-            throw new BadCredentialException(ResultCode.USER_AUTH_ERROR);
+            throw new BadCredentialException(ResultCode.AUTHENTICATION_FAILED);
         }
     }
 
@@ -162,7 +162,7 @@ public class AuthServiceImpl implements AuthService {
         ConfirmationEmail confirmationEmail = validateConfirmationEmail(token);
 
         User user = userRepo.findById(confirmationEmail.getUserId())
-                .orElseThrow(() -> new BadRequestException(ResultCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BadRequestException(ResultCode.USER_NOT_FOUND_OR_DISABLED));
 
         user.setEmailVerified(true);
         confirmationEmail.setConfirmedAt(LocalDateTime.now());
@@ -239,6 +239,31 @@ public class AuthServiceImpl implements AuthService {
         return jwtService.introspectToken(request);
     }
 
+    @Override
+    public void resendEmailConfirmation(ResendEmailConfirmationRequest request) {
+        String normalizedEmail = request.email().toLowerCase();
+        User user = userRepo.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new BadRequestException(ResultCode.USER_NOT_FOUND_OR_DISABLED));
+
+        if(user.isEmailVerified()) {
+            throw new BadRequestException(ResultCode.EMAIL_ALREADY_VERIFIED);
+        }
+
+
+
+        confirmationEmailRepo.findByTypeAndUserId(MailType.REGISTRATION_CONFIRMATION, user.getId())
+                .forEach(confirmationEmail -> {
+                    confirmationEmail.setRevoked(true);
+                    confirmationEmailRepo.save(confirmationEmail);
+                });
+
+        try {
+            sendVerificationEmail(user);
+        } catch (MessagingException | NoSuchAlgorithmException e) {
+            log.error("Error sending email: {}", e.getMessage());
+        }
+    }
+
     /**
      * Helper Methods
      */
@@ -256,7 +281,7 @@ public class AuthServiceImpl implements AuthService {
 
     private void handleExistingUserForRegistration(User user, RegisterRequest authRequest) throws MessagingException, NoSuchAlgorithmException {
         if (user.isEmailVerified()) {
-            throw new BadCredentialException(ResultCode.USER_ALREADY_EXISTS);
+            throw new BadRequestException(ResultCode.USER_ALREADY_EXISTS);
         }
 
         updateExistingUser(user, authRequest);
@@ -328,11 +353,15 @@ public class AuthServiceImpl implements AuthService {
 
     private ConfirmationEmail validateConfirmationEmail(String token) {
         ConfirmationEmail confirmationEmail = confirmationEmailRepo.findByToken(token)
-                .orElseThrow(() -> new BadRequestException(ResultCode.AUTH_TOKEN_INVALID));
+                .orElseThrow(() -> new BadRequestException(ResultCode.INVALID_TOKEN));
 
-        if (confirmationEmail.isRevoked() || confirmationEmail.getExpiredAt().isBefore(LocalDateTime.now())
+        if(confirmationEmail.getExpiredAt().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException(ResultCode.TOKEN_EXPIRED);
+        }
+
+        if (confirmationEmail.isRevoked()
                 || confirmationEmail.getConfirmedAt() != null) {
-            throw new BadRequestException(ResultCode.AUTH_TOKEN_INVALID);
+            throw new BadRequestException(ResultCode.INVALID_TOKEN);
         }
 
         return confirmationEmail;

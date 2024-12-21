@@ -7,6 +7,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import java.util.List;
+
 @Configuration
 @EnableWebMvc
 public class WebConfig {
@@ -15,16 +17,10 @@ public class WebConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-//        config.setAllowCredentials(true);
-        config.addAllowedOrigin("*"); // Allow requests from this origin
-//        config.
+        config.setAllowCredentials(true);
+        config.setAllowedOriginPatterns(List.of("*")); // Use allowedOriginPatterns instead of allowedOrigins
         config.addAllowedHeader("*");
-        config.addAllowedMethod("OPTIONS");
-        config.addAllowedMethod("GET");
-        config.addAllowedMethod("POST");
-        config.addAllowedMethod("PUT");
-        config.addAllowedMethod("PATCH");
-        config.addAllowedMethod("DELETE");
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
         config.setMaxAge(3600L);
         source.registerCorsConfiguration("/api/**", config);
         return new CorsFilter(source);

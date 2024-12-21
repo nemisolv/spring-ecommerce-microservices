@@ -21,6 +21,6 @@ public class PermissionException extends RuntimeException {
 
     public PermissionException(String message) {
         super(message);
-        this.resultCode = ResultCode.USER_PERMISSION_ERROR;
+        this.resultCode = ResultCode.INSUFFICIENT_PERMISSIONS;
     }
 }
