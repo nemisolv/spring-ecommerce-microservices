@@ -49,9 +49,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static net.nemisolv.lib.util.Constants.EXP_TIME_PASSWORD_RESET_EMAIL;
-import static net.nemisolv.lib.util.Constants.EXP_TIME_REGISTRATION_EMAIL;
+import static net.nemisolv.lib.util.Constants.*;
 
+// fix email expire time
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -76,11 +76,12 @@ public class AuthServiceImpl implements AuthService {
 
 //    util
 
-    private static final Map<MailType, LocalDateTime> mailTypeToExp = Map.of(
-            MailType.REGISTRATION_CONFIRMATION, EXP_TIME_REGISTRATION_EMAIL,
-            MailType.PASSWORD_RESET, EXP_TIME_PASSWORD_RESET_EMAIL
-//            MailType.ORDER_CREATED_NOTIFICATION,
-    );
+    // don't use static, because it will be called only once and assign time will be fixed -> lead to expire time of email is fixed
+//    private  final Map<MailType, LocalDateTime> mailTypeToExp = Map.of(
+//            MailType.REGISTRATION_CONFIRMATION, getExpTimeRegistrationEmail(),
+//            MailType.PASSWORD_RESET, getExpTimePasswordResetEmail()
+////            MailType.ORDER_CREATED_NOTIFICATION,
+//    );
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authRequest) {
@@ -195,7 +196,7 @@ public class AuthServiceImpl implements AuthService {
                 .userId(user.getId())
                 .token(token)
                 .type(MailType.PASSWORD_RESET)
-                .expiredAt(EXP_TIME_PASSWORD_RESET_EMAIL)
+                .expiredAt(getExpTimePasswordResetEmail())
                 .build();
 
         confirmationEmailRepo.save(resetPasswordConfirmation);
@@ -304,7 +305,7 @@ public class AuthServiceImpl implements AuthService {
         ConfirmationEmail confirmationEmail = ConfirmationEmail.builder()
                 .token(token)
                 .type(MailType.REGISTRATION_CONFIRMATION)
-                .expiredAt(EXP_TIME_REGISTRATION_EMAIL)
+                .expiredAt(getExpTimeRegistrationEmail())
                 .userId(user.getId())
                 .build();
 
@@ -358,9 +359,12 @@ public class AuthServiceImpl implements AuthService {
         if(confirmationEmail.getExpiredAt().isBefore(LocalDateTime.now())) {
             throw new BadRequestException(ResultCode.TOKEN_EXPIRED);
         }
+        if(confirmationEmail.getConfirmedAt() != null) {
+            throw new BadRequestException(ResultCode.EMAIL_ALREADY_VERIFIED);
+        }
 
         if (confirmationEmail.isRevoked()
-                || confirmationEmail.getConfirmedAt() != null) {
+                ) {
             throw new BadRequestException(ResultCode.INVALID_TOKEN);
         }
 
@@ -383,16 +387,16 @@ public class AuthServiceImpl implements AuthService {
         return allowedRolesForManager.contains(role.getName().toString());
     }
 
-    private void createAndSaveConfirmationEmail(Long userId, String token,MailType mailType) {
-        ConfirmationEmail confirmationEmail = ConfirmationEmail.builder()
-                .userId(userId)
-                .token(token)
-                .type(mailType)
-                .expiredAt(mailTypeToExp.get(mailType))
-                .build();
-
-        confirmationEmailRepo.save(confirmationEmail);
-        
-    }
+//    private void createAndSaveConfirmationEmail(Long userId, String token,MailType mailType) {
+//        ConfirmationEmail confirmationEmail = ConfirmationEmail.builder()
+//                .userId(userId)
+//                .token(token)
+//                .type(mailType)
+//                .expiredAt(mailTypeToExp.get(mailType))
+//                .build();
+//
+//        confirmationEmailRepo.save(confirmationEmail);
+//
+//    }
 
 }

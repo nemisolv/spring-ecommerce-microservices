@@ -31,7 +31,7 @@ public enum ResultCode {
     TOKEN_EXPIRED(20006, "Token has expired"),
 
     PERMISSION_ALREADY_ASSIGNED(20016, "Permission already assigned to role"),
-    EMAIL_ALREADY_VERIFIED(20011     , "Email already verified"),
+    EMAIL_ALREADY_VERIFIED(20017     , "Email already verified"),
 
     // Customer-related errors
     CUSTOMER_NOT_FOUND(20012, "Customer does not exist"),
