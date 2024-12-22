@@ -3,6 +3,8 @@ server:
 spring:
   cloud:
     gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
       globalcors:
         cors-configurations:
           '[/**]':
@@ -12,6 +14,9 @@ spring:
               - POST
               - PUT
               - DELETE
+            allowed-headers:
+              - '*'
+            allow-credentials: true
       discovery:
         locator:
           enabled: true

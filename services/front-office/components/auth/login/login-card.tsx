@@ -80,8 +80,13 @@ export function LoginCard(props: CardProps): React.JSX.Element {
      
 
     }catch(e) {
-      const errorData = e.data as ErrorResponse;
+      const errorData = e?.data as ErrorResponse;
       console.log("🚀 ~ onSubmit ~ errorData::", errorData)
+      if(!errorData) {
+        setUnverifiedEmail(undefined);
+        setErrorMessage(ResultCodeMessages[ResultCode.UNKNOWN_ERROR]);
+        return;
+      }
       const {code} = errorData;
       if(!code) return 
         // if not verified => auto verify
