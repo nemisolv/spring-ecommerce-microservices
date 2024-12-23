@@ -10,6 +10,7 @@ import net.nemisolv.identity.security.UserPrincipal;
 import net.nemisolv.identity.security.oauth2.user.OAuth2UserInfo;
 import net.nemisolv.identity.security.oauth2.user.OAuth2UserInfoFactory;
 import net.nemisolv.lib.core._enum.AuthProvider;
+import net.nemisolv.lib.core._enum.RoleName;
 import net.nemisolv.lib.core.exception.OAuth2AuthenticationProcessionException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
@@ -48,9 +49,9 @@ private final RoleRepository roleRepo;
                 userRequest.getClientRegistration().getRegistrationId(),
                 oAuth2User.getAttributes());
     //because gitHub does not provide email, we don't need to check for email
-//        if (oAuth2UserInfo.getEmail().isEmpty()) {
-//            throw new OAuth2AuthenticationProcessionException("Email not found from OAuth2 provider");
-//        }
+        if (oAuth2UserInfo.getEmail().isEmpty() || oAuth2UserInfo.getEmail() == null) {
+            throw new OAuth2AuthenticationProcessionException("Email not found from OAuth2 provider");
+        }
         Optional<User> userOptional = userRepo.findByEmail(oAuth2UserInfo.getEmail());
         User user;
         if(userOptional.isPresent()) {
@@ -80,6 +81,7 @@ private final RoleRepository roleRepo;
         user.setAuthProvider(AuthProvider.getEnum(userRequest.getClientRegistration().getRegistrationId()));
         user.setProviderId(oauth2UserInfo.getId());
         user.setImgUrl(oauth2UserInfo.getImageUrl());
+        user.setRole(roleRepo.findByName(RoleName.CUSTOMER).orElseThrow(() -> new RuntimeException("User Role not set.")));
         return userRepo.save(user);
     }
 

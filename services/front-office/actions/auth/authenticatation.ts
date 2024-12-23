@@ -1,4 +1,5 @@
 
+import { Routes } from "@/constants/routes";
 import { axiosInstance } from "@/lib/axios.config";
 import { getBaseUrl } from "@/lib/urls/get-base-url";
 import { VerifyEmailWithOtpSchema } from "@/schemas/auth/verify-email-with-otp-schema";
@@ -21,9 +22,8 @@ export const signUp = async(params: SignUpParams) => {
 }
 
 export const continueWithGoogle = async () => {
-    const url = process.env.NEXT_PUBLIC_API_URL +'/oauth2/authorize/google?redirect_uri=' + `${getBaseUrl()}`
+    const url = process.env.NEXT_PUBLIC_API_URL +'/oauth2/authorize/google?redirect_uri=' + `${getBaseUrl()}/${Routes.OAuth2Redirect}`;
     
-    console.log("🚀 ~ continueWithGoogle ~ url::::", url)
     // call to backend
     await axiosInstance.get(url);
 }
@@ -32,8 +32,15 @@ export const continueWithFacebook = async () => {
     return null;
 }
 
+export const getAuthResponse = async (): Promise<ApiResponse<LoginSuccessResponse>> => {
+    return await axiosInstance.get('/auth/auth-response')
+}
+
 export const continueWithMicrosoft = async () => {
-    return null;
+    const url = process.env.NEXT_PUBLIC_API_URL +'/oauth2/authorize/github?redirect_uri=' + `${getBaseUrl()}/${Routes.OAuth2Redirect}`;
+    
+    // call to backend
+    await axiosInstance.get(url);
 }
 
 export const resendEmailConfirmation = async(params: ResendEmailConfirmationParams) => {

@@ -21,6 +21,11 @@ export const saveTokens =
   }
 };
 
+export const saveOnlyToken = (accessToken: string) => {
+  console.log("🚀 ~ saveOnlyToken ~ accessToken::", accessToken)
+  Cookies.set(ACCESS_TOKEN, accessToken, {expires: 1200, secure: process.env.NODE_ENV === 'production'}); // secure: true in production
+}
+
 export const getToken = () => {
   return {
     accessToken: Cookies.get(ACCESS_TOKEN),

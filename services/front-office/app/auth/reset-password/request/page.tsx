@@ -8,7 +8,7 @@ import { ResetPasswordCard } from '@/components/auth/reset-password/reset-passwo
 import { createTitle } from '@/lib/utils';
 import type { NextPageProps } from '@/types/next-page-props';
 
-const paramsCache = createSearchParamsCache({
+const searchParamsCache = createSearchParamsCache({
   token: parseAsString.withDefault('')
 });
 
@@ -19,28 +19,11 @@ export const metadata: Metadata = {
 export default async function ResetPasswordPage({
   searchParams
 }: NextPageProps): Promise<React.JSX.Element> {
-  const { token } = await paramsCache.parse(searchParams);
+  const { token } = await searchParamsCache.parse(searchParams);
   if (!token) {
     return notFound();
   }
 
-
-
-  // const resetPasswordRequest = await prisma.resetPasswordRequest.findUnique({
-  //   where: { id: requestId },
-  //   select: {
-  //     id: true,
-  //     expires: true
-  //   }
-  // });
-
-  // if (!resetPasswordRequest) {
-  //   return notFound();
-  // }
-
-  // if (isAfter(new Date(), resetPasswordRequest.expires)) {
-  //   return redirect(Routes.ResetPasswordExpired);
-  // }
 
   return (
     <AuthContainer maxWidth="sm">

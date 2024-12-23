@@ -279,6 +279,12 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    @Override
+    public AuthenticationResponse getAuthResponse() {
+        UserPrincipal userPrincipal = AuthContext.getCurrentUser();
+        return generateAuthResponse(userPrincipal);
+    }
+
     /**
      * Helper Methods
      */

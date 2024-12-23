@@ -41,7 +41,7 @@ import {
   logInSchema,
   type LoginSchema}
   from '@/schemas/auth/login-schema';
-import { continueWithGoogle, continueWithMicrosoft,  authenticate } from '@/actions/auth/authenticatation';
+import { continueWithGoogle, continueWithMicrosoft as continueWithGithub,  authenticate } from '@/actions/auth/authenticatation';
 import ErrorResponse from '@/schemas/ErrorResponse';
 import { ResultCode, ResultCodeMessages } from '@/constants/api-result-code';
 import { useRouter } from 'next/navigation';
@@ -112,13 +112,13 @@ export function LoginCard(props: CardProps): React.JSX.Element {
     
     setIsLoading(false);
   };
-  const handleSignInWithMicrosoft = async (): Promise<void> => {
+  const handleSignInWithGithub = async (): Promise<void> => {
     if (!canSubmit) {
       return;
     }
     setIsLoading(true);
     try {
-     await continueWithMicrosoft();
+     await continueWithGithub();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     }catch(e) {
       toast.error("Couldn't continue with Microsoft");
@@ -245,13 +245,13 @@ export function LoginCard(props: CardProps): React.JSX.Element {
             variant="outline"
             className="flex w-full flex-row items-center gap-2"
             disabled={!canSubmit}
-            onClick={handleSignInWithMicrosoft}
+            onClick={handleSignInWithGithub}
           >
             <MicrosoftLogo
               width="20"
               height="20"
             />
-            Microsoft
+            Github
           </Button>
         </div>
       </CardContent>

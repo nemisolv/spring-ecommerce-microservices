@@ -46,7 +46,7 @@ public class SecurityConfiguration {
 
                 .authorizeHttpRequests(req -> req.requestMatchers("/v1/api/auth/**").permitAll()
                         .requestMatchers(ignoredUrlsProperties.getUrls().toArray(new String[0])).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/api/posts/**").permitAll()
+
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

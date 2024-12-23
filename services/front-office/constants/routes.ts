@@ -32,6 +32,7 @@ export enum Routes {
   VerifyEmailRequest = '/auth/verify-email/request',
   VerifyEmailExpired = '/auth/verify-email/expired',
   VerifyEmailSuccess = '/auth/verify-email/success',
+  OAuth2Redirect = '/auth/oauth2/redirect',
 
   Dashboard = '/dashboard',
   Home = '/dashboard/home',

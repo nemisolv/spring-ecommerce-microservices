@@ -25,5 +25,7 @@ public interface AuthService {
     IntrospectResponse introspectToken(IntrospectRequest request);
 
     void resendEmailConfirmation(ResendEmailConfirmationRequest request);
+
+    AuthenticationResponse getAuthResponse();
 }
 

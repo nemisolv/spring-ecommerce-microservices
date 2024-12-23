@@ -87,6 +87,13 @@ export interface FullInfoUser {
 
 export interface RoleResponse {
     id: number;
-    name: string;
+    name: RoleEnum;
     permissions: Set<string>;
+}
+
+export enum RoleEnum {
+    ADMIN = 'ADMIN',
+    MANAGER = 'MANAGER',
+    STAFF = 'STAFF',
+    CUSTOMER = 'CUSTOMER',
 }
