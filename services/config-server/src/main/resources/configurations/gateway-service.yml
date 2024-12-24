@@ -13,8 +13,12 @@ spring:
         - id: identity-service
           uri: lb:http://identity-service
           predicates:
-            # use comma instead of separating 2 lines (syntax -> so stranger )
-            - Path=/api/v1/auth/**,/oauth2/**
+            # if you want to use list of path, use comma instead of separating 2 lines (syntax -> so stranger )
+#            - Path=/api/v1/auth/**,/oauth2/**
+            - Path=${app.api-prefix}/identity/**
+          filters:
+            - StripPrefix=2
+
 #        - id: customer-service
 #          uri: lb:http://CUSTOMER-SERVICE
 #          predicates:
@@ -30,8 +34,15 @@ spring:
         - id: product-service
           uri: lb:http://product-service
           predicates:
-            - Path=/api/v1/products/**
+            - Path= ${app.api-prefix}/products/**
+          filters:
+              - StripPrefix=2
 #        - id: payment-service
 #          uri: lb:http://PAYMENT-SERVICE
 #          predicates:
 #            - Path=/api/v1/payments/**
+
+
+app:
+  identity-url: http://localhost:8051/api/v1
+  api-prefix: /api/v1

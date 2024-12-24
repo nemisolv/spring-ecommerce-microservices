@@ -15,7 +15,7 @@ import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/internal-auth")
+@RequestMapping("/internal-auth")
 public class InternalAuthenticationController {
 
     private final AuthService authService;
@@ -26,6 +26,11 @@ public class InternalAuthenticationController {
 //        AuthenticationResponse response = authService.getAuthResponse();
 //        return ApiResponse.success(response);
 //    }
+
+    @GetMapping("/hello")
+    public ApiResponse<String> hello() {
+        return ApiResponse.success("Hello guy!!");
+    }
 
     @PostMapping("/refresh")
     public void refreshToken(HttpServletRequest req, HttpServletResponse res) throws IOException {
