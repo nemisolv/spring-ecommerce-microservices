@@ -24,8 +24,8 @@
         <module name="common-lib" />
         <module name="identity-service" />
         <module name="discovery-service" />
-        <module name="notification-service" />
         <module name="gateway" />
+        <module name="notification-service" />
       </profile>
     </annotationProcessing>
   </component>

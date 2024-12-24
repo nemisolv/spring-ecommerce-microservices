@@ -22,7 +22,7 @@ export const signUp = async(params: SignUpParams) => {
 }
 
 export const continueWithGoogle = async () => {
-    const url = process.env.NEXT_PUBLIC_API_URL +'/oauth2/authorize/google?redirect_uri=' + `${getBaseUrl()}/${Routes.OAuth2Redirect}`;
+    const url = process.env.NEXT_PUBLIC_API_URL +'/oauth2/authorize/google?redirect_uri=' + `${getBaseUrl()}${Routes.OAuth2Redirect}`;
     
     // call to backend
     await axiosInstance.get(url);
@@ -37,7 +37,7 @@ export const getAuthResponse = async (): Promise<ApiResponse<LoginSuccessRespons
 }
 
 export const continueWithMicrosoft = async () => {
-    const url = process.env.NEXT_PUBLIC_API_URL +'/oauth2/authorize/github?redirect_uri=' + `${getBaseUrl()}/${Routes.OAuth2Redirect}`;
+    const url = process.env.NEXT_PUBLIC_API_URL +'/oauth2/authorize/azure?redirect_uri=' + `${getBaseUrl()}${Routes.OAuth2Redirect}`;
     
     // call to backend
     await axiosInstance.get(url);

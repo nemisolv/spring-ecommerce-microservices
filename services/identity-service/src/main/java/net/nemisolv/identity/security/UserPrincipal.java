@@ -7,6 +7,10 @@ import net.nemisolv.identity.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
@@ -17,7 +21,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPrincipal implements UserDetails, OAuth2User {
+public class UserPrincipal  implements UserDetails, OAuth2User   {
     private Long id;
     private String email;
     private String password;
@@ -29,6 +33,7 @@ public class UserPrincipal implements UserDetails, OAuth2User {
     private Collection<? extends GrantedAuthority> authorities;
 
     private Role role;
+
 
 
     public static UserPrincipal create(User user) {
@@ -107,4 +112,6 @@ public class UserPrincipal implements UserDetails, OAuth2User {
     public String getName() {
         return String.valueOf(id);
     }
+
+
 }

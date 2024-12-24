@@ -17,7 +17,11 @@ public class OAuth2UserInfoFactory {
             return new FacebookOAuth2UserInfo(attributes);
         }else if(registrationId.equalsIgnoreCase(AuthProvider.GITHUB.getValue()))    {
             return new GithubOAuth2UserInfo(attributes);
-        }else {
+        }else if(registrationId.equalsIgnoreCase(AuthProvider.AZURE.getValue())) {
+            return new AzureMicrosoftOAuth2UserInfo(attributes);
+        }
+
+        else {
             throw new OAuth2AuthenticationProcessionException("Sorry! Login with " + registrationId + " is not supported yet!");
         }
 

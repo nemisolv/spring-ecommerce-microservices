@@ -1,19 +1,19 @@
 package net.nemisolv.lib.core._enum;
 
+import lombok.Getter;
+
+@Getter
 public enum AuthProvider {
     LOCAL("local"),
     GOOGLE("google"),
     FACEBOOK("facebook"),
-    GITHUB("github");
+    GITHUB("github"),
+    AZURE("azure");
 
-    private String value;
+    private final String value;
 
     AuthProvider(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     public static AuthProvider getEnum(String value) {

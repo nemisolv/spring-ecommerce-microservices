@@ -5,13 +5,24 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.nemisolv.identity.entity.User;
+import net.nemisolv.identity.helper.UserHelper;
+import net.nemisolv.identity.repository.RoleRepository;
+import net.nemisolv.identity.repository.UserRepository;
+import net.nemisolv.identity.security.UserPrincipal;
+import net.nemisolv.identity.security.oauth2.user.OAuth2UserInfo;
+import net.nemisolv.identity.security.oauth2.user.OAuth2UserInfoFactory;
 import net.nemisolv.identity.service.JwtService;
+import net.nemisolv.lib.core._enum.AuthProvider;
+import net.nemisolv.lib.core._enum.RoleName;
 import net.nemisolv.lib.core.exception.BadRequestException;
 import net.nemisolv.identity.properties.AppProperties;
+import net.nemisolv.lib.core.exception.ResourceNotFoundException;
 import net.nemisolv.lib.util.CookieUtil;
 import net.nemisolv.lib.util.ResultCode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -27,6 +38,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final JwtService jwtService;
     private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
     private final AppProperties appProperties;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserHelper userHelper;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -44,7 +58,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         Optional<String> redirectUri = CookieUtil.getCookie(request, HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME)
                 .map(Cookie::getValue);
-        log.info("redirectUri: " + redirectUri);
+        log.info("redirectUri: {}", redirectUri);
 
         if(redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
             try {
@@ -55,6 +69,49 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         }
 
         String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
+
+
+        // temp handle, will fix later to scale
+        // handle open id connection
+        Object principal = authentication.getPrincipal();
+        if(principal instanceof DefaultOidcUser oAuth2User) {
+            if(oAuth2User.getAttributes().get("email") != null) {
+            String email = oAuth2User.getEmail();
+                userRepository.findByEmail(email)
+                        .ifPresentOrElse(
+                                user -> {
+                                    user.setImgUrl(oAuth2User.getPicture());
+                                    user.setName(oAuth2User.getGivenName() + " " + oAuth2User.getFamilyName());
+                                    user.setPhoneNumber(oAuth2User.getPhoneNumber());
+                                    userRepository.save(user);
+
+                                },() -> {
+                                    // create new user
+                                    User newUser = new User();
+                                    newUser.setEmail(email);
+                                    newUser.setImgUrl(oAuth2User.getPicture());
+                                    newUser.setName(oAuth2User.getGivenName() + " " + oAuth2User.getFamilyName());
+                                    newUser.setPhoneNumber(oAuth2User.getPhoneNumber());
+                                    newUser.setEnabled(true);
+                                    newUser.setAuthProvider(AuthProvider.AZURE);
+                                    newUser.setProviderId(oAuth2User.getIdToken().toString());                                    newUser.setAddress(oAuth2User.getAddress().getStreetAddress());
+                                    newUser.setRole(roleRepository.findByName(RoleName.CUSTOMER).get());
+                                    newUser.setUsername(userHelper.generateUsername(oAuth2User.getName()));
+                                    newUser.setEmailVerified(true); // Any defaults or additional settings can be applied
+                                    userRepository.save(newUser);
+                }
+                        );
+
+                UserPrincipal userPrincipal = UserPrincipal.builder()
+                        .email(email)
+                        .build();
+                String token = jwtService.generateToken(userPrincipal);
+                return UriComponentsBuilder.fromUriString(targetUrl)
+                        .queryParam("accessToken", token)
+                        .build().toUriString();
+            }
+        }
+
 
         String token = jwtService.generateToken((UserDetails) authentication.getPrincipal());
 //        String refreshToken = jwtService.generateRefreshToken((UserDetails) authentication.getPrincipal());
@@ -83,11 +140,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .anyMatch(authorizedRedirectUri -> {
                     // just to make sure that the host and port are the same, we don't care about the path-> flexibility for the client
                     URI authorizedURI = URI.create(authorizedRedirectUri);
-                    if(authorizedURI.getHost().equalsIgnoreCase(clientRedirectUri.getHost())
-                            && authorizedURI.getPort() == clientRedirectUri.getPort()) {
-                        return true;
-                    }
-                    return false;
+                    return authorizedURI.getHost().equalsIgnoreCase(clientRedirectUri.getHost())
+                            && authorizedURI.getPort() == clientRedirectUri.getPort();
                 });
     }
 

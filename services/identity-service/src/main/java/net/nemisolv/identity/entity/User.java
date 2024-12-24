@@ -30,6 +30,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private AuthProvider authProvider;
 
+    @Column(columnDefinition = "TEXT")
     private String providerId;
 
     private boolean enabled;

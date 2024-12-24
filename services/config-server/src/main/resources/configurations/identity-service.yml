@@ -38,10 +38,23 @@ spring:
   security:
     oauth2:
       client:
-#        provider:
-#          azure:
-#            issuer-uri: https://login.microsoftonline.com/your-tenant-id/v2.0
+        provider:
+          azure:
+            issuer-uri: https://login.microsoftonline.com/bbf9aad6-5f58-4387-927e-02f0b07a72fa/v2.0
+            user-name-attribute: name
         registration:
+          azure:
+            provider: azure
+            client-id: 4a9d2591-57eb-4b88-8a56-f4950615b816
+            client-secret: j028Q~7X9KmtTRjnfPiV4RqLFxNlQ09cg4iSLdo.
+            authorization-grant-type: authorization_code
+            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
+            scope:
+              - openid
+              - email
+              - profile
+            client-name: Azure
+
           google:
             clientId: 108748481333-q03ovpcihsp67ngr7d3apam9feolosgv.apps.googleusercontent.com
             clientSecret: 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

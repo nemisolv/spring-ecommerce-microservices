@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
@@ -49,7 +50,7 @@ private final RoleRepository roleRepo;
                 userRequest.getClientRegistration().getRegistrationId(),
                 oAuth2User.getAttributes());
     //because gitHub does not provide email, we don't need to check for email
-        if (oAuth2UserInfo.getEmail().isEmpty() || oAuth2UserInfo.getEmail() == null) {
+        if (!StringUtils.hasLength(oAuth2UserInfo.getEmail())) {
             throw new OAuth2AuthenticationProcessionException("Email not found from OAuth2 provider");
         }
         Optional<User> userOptional = userRepo.findByEmail(oAuth2UserInfo.getEmail());
@@ -81,6 +82,7 @@ private final RoleRepository roleRepo;
         user.setAuthProvider(AuthProvider.getEnum(userRequest.getClientRegistration().getRegistrationId()));
         user.setProviderId(oauth2UserInfo.getId());
         user.setImgUrl(oauth2UserInfo.getImageUrl());
+        user.setEnabled(true);
         user.setRole(roleRepo.findByName(RoleName.CUSTOMER).orElseThrow(() -> new RuntimeException("User Role not set.")));
         return userRepo.save(user);
     }

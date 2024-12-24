@@ -6,6 +6,7 @@ services:
       MYSQL_ROOT_PASSWORD: nemisolv
       MYSQL_USER: nemisolv
       MYSQL_PASSWORD: nemisolv
+      MYSQL_DATABASE: my_ecommerce_identity
     ports:
       - "3306:3306"
     volumes:
