@@ -23,7 +23,6 @@ export const signUp = async(params: SignUpParams) => {
 
 export const continueWithGoogle = async () => {
     const url = process.env.NEXT_PUBLIC_API_URL +'/oauth2/authorize/google?redirect_uri=' + `${getBaseUrl()}${Routes.OAuth2Redirect}`;
-    
     // call to backend
     await axiosInstance.get(url);
 }

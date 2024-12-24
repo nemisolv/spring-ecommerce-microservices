@@ -40,13 +40,13 @@ spring:
       client:
         provider:
           azure:
-            issuer-uri: https://login.microsoftonline.com/bbf9aad6-5f58-4387-927e-02f0b07a72fa/v2.0
+            issuer-uri: https://login.microsoftonline.com/your-directory-id/v2.0
             user-name-attribute: name
         registration:
           azure:
             provider: azure
-            client-id: 4a9d2591-57eb-4b88-8a56-f4950615b816
-            client-secret: j028Q~7X9KmtTRjnfPiV4RqLFxNlQ09cg4iSLdo.
+            client-id: your-client-id
+            client-secret: your-client-secret
             authorization-grant-type: authorization_code
             redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
@@ -56,35 +56,13 @@ spring:
             client-name: Azure
 
           google:
-            clientId: 108748481333-q03ovpcihsp67ngr7d3apam9feolosgv.apps.googleusercontent.com
-            clientSecret: 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
+            clientId: your-client-id
+            clientSecret: your-client-secret
             redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
               - email
               - profile
-          facebook:
-            clientId: 1106813467180481
-            clientSecret: 7ffa2355ccf06f28aee9c121909e45c7
-            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
-            scope:
-              - email
-              - public_profile
-          github:
-            clientId: Ov23lihBEakHgxjaQbcA
-            clientSecret: c72fed7f34e7309ef098fe3ae31b20983f7ae477
-            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
-            scope:
-              - user:email
-              - read:user
-
-#          provider:
-#            facebook:
-#              authorizationUri: https://www.facebook.com/v3.0/dialog/oauth
-#              tokenUri: https://graph.facebook.com/v3.0/oauth/access_token
-#              userInfoUri: https://graph.facebook.com/v3.0/me?fields=id,first_name,middle_name,last_name,name,email,picture
-
-
-
+#
 
 
 

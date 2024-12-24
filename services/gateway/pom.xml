@@ -65,6 +65,12 @@
             <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>net.nemisolv</groupId>
+            <artifactId>common-lib</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
 
     </dependencies>
     <dependencyManagement>

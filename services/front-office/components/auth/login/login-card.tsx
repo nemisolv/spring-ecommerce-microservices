@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import GoogleLogo from 'public/google-logo.svg';
 import MicrosoftLogo from 'public/microsoft-logo.svg';
-import { toast } from 'sonner';
 
 import { OrContinueWith } from '@/components/auth/or-continue-with';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -41,10 +40,11 @@ import {
   logInSchema,
   type LoginSchema}
   from '@/schemas/auth/login-schema';
-import { continueWithGoogle, continueWithMicrosoft,  authenticate } from '@/actions/auth/authenticatation';
+import {   authenticate } from '@/actions/auth/authenticatation';
 import ErrorResponse from '@/schemas/ErrorResponse';
 import { ResultCode, ResultCodeMessages } from '@/constants/api-result-code';
 import { useRouter } from 'next/navigation';
+import { buildOAuth2Url } from '@/lib/auth/oauth2';
 
 
 
@@ -98,35 +98,39 @@ export function LoginCard(props: CardProps): React.JSX.Element {
 
     
   };
-  const handleSignInWithGoogle = async (): Promise<void> => {
-    if (!canSubmit) {
-      return;
-    }
-    setIsLoading(true);
-    try {
-      await continueWithGoogle();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    }catch(e) {
-      toast.error("Couldn't continue with Google");
-    }
+
+  // explain why we use link directly instead of function: The authentication flow must happen in a visible browsing context, not with a fetch request
+  // refer: https://stackoverflow.com/questions/72382892/access-to-fetch-at-https-accounts-google-com-o-oauth2-v2-auth-has-been-blocked
+  
+  // const handleSignInWithGoogle = async (): Promise<void> => {
+  //   if (!canSubmit) {
+  //     return;
+  //   }
+  //   setIsLoading(true);
+  //   try {
+  //     await continueWithGoogle();
+  //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //   }catch(e) {
+  //     toast.error("Couldn't continue with Google");
+  //   }
     
-    setIsLoading(false);
-  };
-  const handleSignInWithMicrosoft = async (): Promise<void> => {
-    if (!canSubmit) {
-      return;
-    }
-    setIsLoading(true);
-    try {
-     await continueWithMicrosoft();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    }catch(e) {
-      toast.error("Couldn't continue with Microsoft");
-    }
+  //   setIsLoading(false);
+  // };
+  // const handleSignInWithMicrosoft = async (): Promise<void> => {
+  //   if (!canSubmit) {
+  //     return;
+  //   }
+  //   setIsLoading(true);
+  //   try {
+  //    await continueWithMicrosoft();
+  //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //   }catch(e) {
+  //     toast.error("Couldn't continue with Microsoft");
+  //   }
 
    
-    setIsLoading(false);
-  };
+  //   setIsLoading(false);
+  // };
   return (
     <Card {...props}>
       <CardHeader>
@@ -227,32 +231,27 @@ export function LoginCard(props: CardProps): React.JSX.Element {
         </FormProvider>
         <OrContinueWith />
         <div className="flex flex-row gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex w-full flex-row items-center gap-2"
-            disabled={!canSubmit}
-            onClick={handleSignInWithGoogle}
-          >
+        
+            <Link
+            className='flex w-full flex-row items-center justify-center gap-2 border border-input rounded-md py-1'
+            href={buildOAuth2Url('google')}
+            >
             <GoogleLogo
               width="20"
               height="20"
             />
             Google
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="flex w-full flex-row items-center gap-2"
-            disabled={!canSubmit}
-            onClick={handleSignInWithMicrosoft}
-          >
+            </Link>
+            <Link
+            className='flex w-full flex-row items-center justify-center gap-2 border border-input rounded-md  py-1'
+            href={buildOAuth2Url('azure')}
+            >
             <MicrosoftLogo
               width="20"
               height="20"
             />
             Microsoft
-          </Button>
+            </Link>
         </div>
       </CardContent>
       <CardFooter className="flex justify-center gap-1 text-sm text-muted-foreground">

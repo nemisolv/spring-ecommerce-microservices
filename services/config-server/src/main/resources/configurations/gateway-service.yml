@@ -1,22 +1,10 @@
 server:
   port: 8222
 spring:
+  main:
+    web-application-type: reactive
   cloud:
     gateway:
-      default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowed-origins: 'http://localhost:3000'
-            allowed-methods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-            allowed-headers:
-              - '*'
-            allow-credentials: true
       discovery:
         locator:
           enabled: true
@@ -25,9 +13,8 @@ spring:
         - id: identity-service
           uri: lb:http://identity-service
           predicates:
-            - Path=/api/v1/auth/**
-            - Path=/api/v1/internal-auth/**
-
+            # use comma instead of separating 2 lines (syntax -> so stranger )
+            - Path=/api/v1/auth/**,/oauth2/**
 #        - id: customer-service
 #          uri: lb:http://CUSTOMER-SERVICE
 #          predicates:
