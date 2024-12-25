@@ -32,7 +32,7 @@ export const continueWithFacebook = async () => {
 }
 
 export const getAuthResponse = async (): Promise<ApiResponse<LoginSuccessResponse>> => {
-    return await axiosInstance.get('/identity/auth/auth-response')
+    return await axiosInstance.get('/identity/internal-auth/auth-response')
 }
 
 export const continueWithMicrosoft = async () => {

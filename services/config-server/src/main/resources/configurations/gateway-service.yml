@@ -15,9 +15,10 @@ spring:
           predicates:
             # if you want to use list of path, use comma instead of separating 2 lines (syntax -> so stranger )
 #            - Path=/api/v1/auth/**,/oauth2/**
-            - Path=${app.api-prefix}/identity/**
+            - Path=${app.api-prefix}/identity/**,
           filters:
             - StripPrefix=2
+
 
 #        - id: customer-service
 #          uri: lb:http://CUSTOMER-SERVICE
@@ -44,5 +45,5 @@ spring:
 
 
 app:
-  identity-url: http://localhost:8051/api/v1
+  identity-url: http://localhost:8051/identity
   api-prefix: /api/v1

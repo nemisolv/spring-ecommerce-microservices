@@ -32,7 +32,7 @@ public class JwtService {
     private final JWTTokenProperties tokenProperties;
     private final UserRepository userRepository;
 
-    public String extractUsername(String token) {
+    public String extractSubject(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -93,7 +93,7 @@ public class JwtService {
     }
 
     public boolean isValidToken(String token, UserDetails userDetails) {
-        String username = extractUsername(token);
+        String username = extractSubject(token);
         return username.equals(userDetails.getUsername()) && extractTokenExpire(token).after(new Date());
     }
 
@@ -105,8 +105,8 @@ public class JwtService {
 
     public IntrospectResponse introspectToken(IntrospectRequest request) {
         String token = request.token();
-        String username = extractUsername(token);
-        Optional<User> user = userRepository.findByUsername(username);
+        String username = extractSubject(token);
+        Optional<User> user = userRepository.findByEmail(username);
         boolean isValid = false;
         if(user.isEmpty()) {
             return new IntrospectResponse(isValid);

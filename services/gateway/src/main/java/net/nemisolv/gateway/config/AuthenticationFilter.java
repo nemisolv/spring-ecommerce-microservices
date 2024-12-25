@@ -39,7 +39,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     private String apiPrefix;
 
     @NonFinal
-    private String[] allowedEndpoints = new String[]{"/identity/auth/**","/identity/oauth2/**"};
+    private String[] allowedEndpoints = new String[]{"/identity/auth","/identity/oauth2"};
 
 
     @Override
@@ -69,12 +69,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     public boolean isAllowedEndpoint(ServerHttpRequest request) {
         String path = request.getURI().getPath();
-        return Arrays.stream(allowedEndpoints).anyMatch(endpoint -> {
-            String regex = apiPrefix + endpoint.replace("**", ".*").replace("*", "[^/]*");
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(path);
-            return matcher.matches();
-        });
+        return Arrays.stream(allowedEndpoints).anyMatch(allow -> path.startsWith(apiPrefix + allow));
     }
 
     @Override

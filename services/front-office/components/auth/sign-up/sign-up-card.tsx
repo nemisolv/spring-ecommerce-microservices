@@ -40,6 +40,7 @@ import { signUpSchema, type SignUpSchema } from "@/schemas/auth/sign-up-schema";
 import { toast } from "sonner";
 import { ResultCode, ResultCodeMessages } from "@/constants/api-result-code";
 import { useRouter } from "next/navigation";
+import { buildOAuth2Url } from "@/lib/auth/oauth2";
 
 export function SignUpCard(props: CardProps): React.JSX.Element {
   const router = useRouter();
@@ -70,20 +71,6 @@ export function SignUpCard(props: CardProps): React.JSX.Element {
     }
   };
 
-  const handleSignInWithGoogle = async (): Promise<void> => {
-    try {
-      const result = await continueWithGoogle();
-    } catch (e) {
-      toast.error("Couldn't continue with Google");
-    }
-  };
-  const handleSignInWithMicrosoft = async (): Promise<void> => {
-    try {
-      const result = await continueWithMicrosoft();
-    } catch (e) {
-      toast.error("Couldn't continue with Microsoft");
-    }
-  };
   return (
     <Card {...props}>
       <CardHeader>
@@ -175,26 +162,27 @@ export function SignUpCard(props: CardProps): React.JSX.Element {
         </FormProvider>
         <OrContinueWith />
         <div className="flex flex-row gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex w-full flex-row items-center gap-2"
-            disabled={methods.formState.isSubmitting}
-            onClick={handleSignInWithGoogle}
-          >
-            <GoogleLogo width="20" height="20" />
+        
+            <Link
+            className='flex w-full flex-row items-center justify-center gap-2 border border-input rounded-md py-1'
+            href={buildOAuth2Url('google')}
+            >
+            <GoogleLogo
+              width="20"
+              height="20"
+            />
             Google
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="flex w-full flex-row items-center gap-2"
-            disabled={methods.formState.isSubmitting}
-            onClick={handleSignInWithMicrosoft}
-          >
-            <MicrosoftLogo width="20" height="20" />
+            </Link>
+            <Link
+            className='flex w-full flex-row items-center justify-center gap-2 border border-input rounded-md  py-1'
+            href={buildOAuth2Url('azure')}
+            >
+            <MicrosoftLogo
+              width="20"
+              height="20"
+            />
             Microsoft
-          </Button>
+            </Link>
         </div>
       </CardContent>
       <CardFooter className="inline-block rounded-b-xl border-t bg-muted pt-6 text-xs text-muted-foreground">

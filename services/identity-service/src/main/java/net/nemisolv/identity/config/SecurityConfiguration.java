@@ -1,5 +1,6 @@
 package net.nemisolv.identity.config;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
@@ -39,13 +40,20 @@ public class SecurityConfiguration {
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
 
+
+    @PostConstruct
+    public void printIgnoredUrls() {
+        System.out.println("Ignored urls: " + ignoredUrlsProperties.getUrls());
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                .authorizeHttpRequests(req -> req.requestMatchers("/v1/api/auth/**").permitAll()
+                .authorizeHttpRequests(req -> req
                         .requestMatchers(ignoredUrlsProperties.getUrls().toArray(new String[0])).permitAll()
+
 
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider)
@@ -55,6 +63,7 @@ public class SecurityConfiguration {
                     response.getWriter().write(authException.getMessage());
                 })) .oauth2Login(oauth2 -> oauth2.authorizationEndpoint(authorization -> authorization.baseUri("/oauth2/authorize")
                                 .authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository))
+                                                                                                    // when user authorizes the app, the resource server will redirect to this endpoint
                         .redirectionEndpoint(redirection -> redirection.baseUri("/oauth2/callback/*"))
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .failureHandler(oAuth2AuthenticationFailureHandler)

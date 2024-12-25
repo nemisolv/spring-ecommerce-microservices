@@ -50,7 +50,7 @@ spring:
             client-id: 4a9d2591-57eb-4b88-8a56-f4950615b816
             client-secret: j028Q~7X9KmtTRjnfPiV4RqLFxNlQ09cg4iSLdo.
             authorization-grant-type: authorization_code
-            redirectUri: "{baseUrl}/identity/oauth2/callback/{registrationId}"
+            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
               - openid
               - email
@@ -60,21 +60,21 @@ spring:
           google:
             clientId: 108748481333-q03ovpcihsp67ngr7d3apam9feolosgv.apps.googleusercontent.com
             clientSecret: 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
-            redirectUri: "{baseUrl}/identity/oauth2/callback/{registrationId}"
+            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
               - email
               - profile
           facebook:
             clientId: 1106813467180481
             clientSecret: 7ffa2355ccf06f28aee9c121909e45c7
-            redirectUri: "{baseUrl}/identity/oauth2/callback/{registrationId}"
+            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
               - email
               - public_profile
           github:
             clientId: Ov23lihBEakHgxjaQbcA
             clientSecret: c72fed7f34e7309ef098fe3ae31b20983f7ae477
-            redirectUri: "{baseUrl}/identity/oauth2/callback/{registrationId}"
+            redirectUri: "{baseUrl}/oauth2/callback/{registrationId}"
             scope:
               - user:email
               - read:user
@@ -105,5 +105,10 @@ app:
 
   ignored:
     urls:
-      - /api/v1/auth/**
+      - /identity/auth/**
+      - /api/v1/identity/oauth2/**
+      - /api/v1/oauth2/**
+      - /auth/**
+      - /oauth2/**
+      - /identity/oauth2/**
 

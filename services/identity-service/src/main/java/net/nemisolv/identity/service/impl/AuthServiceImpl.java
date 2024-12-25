@@ -147,7 +147,7 @@ public class AuthServiceImpl implements AuthService {
         String refreshToken = extractBearerToken(req.getHeader(HttpHeaders.AUTHORIZATION));
         if (refreshToken == null) return;
 
-        String userEmail = jwtService.extractUsername(refreshToken);
+        String userEmail = jwtService.extractSubject(refreshToken);
         if (userEmail != null) {
             User user = userRepo.findByEmail(userEmail)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));

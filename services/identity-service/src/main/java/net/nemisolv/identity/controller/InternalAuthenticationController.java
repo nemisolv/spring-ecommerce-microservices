@@ -36,4 +36,10 @@ public class InternalAuthenticationController {
     public void refreshToken(HttpServletRequest req, HttpServletResponse res) throws IOException {
         authService.refreshToken(req, res);
     }
+
+    @GetMapping("/auth-response")
+    public ApiResponse<AuthenticationResponse> getAuthResponse() {
+        AuthenticationResponse response = authService.getAuthResponse();
+        return ApiResponse.success(response);
+    }
 }

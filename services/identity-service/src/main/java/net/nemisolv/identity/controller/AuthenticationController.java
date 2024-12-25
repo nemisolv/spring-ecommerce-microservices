@@ -87,9 +87,9 @@ public class AuthenticationController {
 
 
     // should be private endpoint -> fix later
-    @GetMapping("/auth-response")
-    public ApiResponse<AuthenticationResponse> getAuthResponse() {
-        AuthenticationResponse response = authService.getAuthResponse();
-        return ApiResponse.success(response);
-    }
+//    @GetMapping("/auth-response")
+//    public ApiResponse<AuthenticationResponse> getAuthResponse() {
+//        AuthenticationResponse response = authService.getAuthResponse();
+//        return ApiResponse.success(response);
+//    }
 }
