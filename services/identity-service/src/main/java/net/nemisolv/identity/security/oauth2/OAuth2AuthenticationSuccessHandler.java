@@ -7,11 +7,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nemisolv.identity.entity.User;
 import net.nemisolv.identity.helper.UserHelper;
+import net.nemisolv.identity.payload.profile.CreateOrUpdateUserProfile;
 import net.nemisolv.identity.repository.RoleRepository;
 import net.nemisolv.identity.repository.UserRepository;
+import net.nemisolv.identity.repository.http.UserProfileClient;
 import net.nemisolv.identity.security.UserPrincipal;
 import net.nemisolv.identity.security.oauth2.user.OAuth2UserInfo;
 import net.nemisolv.identity.security.oauth2.user.OAuth2UserInfoFactory;
+import net.nemisolv.identity.service.AuthService;
 import net.nemisolv.identity.service.JwtService;
 import net.nemisolv.lib.core._enum.AuthProvider;
 import net.nemisolv.lib.core._enum.RoleName;
@@ -41,6 +44,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserHelper userHelper;
+    private final UserProfileClient userProfileClient;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -80,26 +84,44 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 userRepository.findByEmail(email)
                         .ifPresentOrElse(
                                 user -> {
-                                    user.setImgUrl(oAuth2User.getPicture());
-                                    user.setName(oAuth2User.getGivenName() + " " + oAuth2User.getFamilyName());
-                                    user.setPhoneNumber(oAuth2User.getPhoneNumber());
+
+                                    userProfileClient.createOrUpdateUserProfile(
+                                             CreateOrUpdateUserProfile.builder()
+                                                     .imgUrl(oAuth2User.getPicture())
+                                                     .name(oAuth2User.getGivenName() + " " + oAuth2User.getFamilyName())
+                                                        .phoneNumber(oAuth2User.getPhoneNumber())
+                                                     .userId(user.getId().toString())
+                                                     .build()
+                                    );
+
+
                                     userRepository.save(user);
 
                                 },() -> {
                                     // create new user
                                     User newUser = new User();
                                     newUser.setEmail(email);
-                                    newUser.setImgUrl(oAuth2User.getPicture());
-                                    newUser.setName(oAuth2User.getGivenName() + " " + oAuth2User.getFamilyName());
-                                    newUser.setPhoneNumber(oAuth2User.getPhoneNumber());
+
+
+
                                     newUser.setEnabled(true);
                                     newUser.setAuthProvider(AuthProvider.AZURE);
-                                    newUser.setProviderId(oAuth2User.getIdToken().toString());                                    newUser.setAddress(oAuth2User.getAddress().getStreetAddress());
+                                    newUser.setProviderId(oAuth2User.getIdToken().toString());
                                     newUser.setRole(roleRepository.findByName(RoleName.CUSTOMER).get());
                                     newUser.setUsername(userHelper.generateUsername(oAuth2User.getName()));
                                     newUser.setEmailVerified(true); // Any defaults or additional settings can be applied
-                                    userRepository.save(newUser);
-                }
+                                    User savedUser = userRepository.save(newUser);
+
+                                    userProfileClient.createOrUpdateUserProfile(
+                                            CreateOrUpdateUserProfile.builder()
+                                                    .imgUrl(oAuth2User.getPicture())
+                                                    .name(oAuth2User.getGivenName() + " " + oAuth2User.getFamilyName())
+                                                    .phoneNumber(oAuth2User.getPhoneNumber())
+                                                    .address(oAuth2User.getAddress().getStreetAddress())
+                                                    .userId(savedUser.getId().toString())
+                                                    .build()
+                                    );
+                                }
                         );
 
                 UserPrincipal userPrincipal = UserPrincipal.builder()

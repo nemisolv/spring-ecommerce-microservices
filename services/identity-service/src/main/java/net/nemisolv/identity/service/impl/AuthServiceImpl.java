@@ -18,9 +18,13 @@ import net.nemisolv.identity.kafka.AuthProducer;
 import net.nemisolv.identity.mapper.UserMapper;
 import net.nemisolv.identity.payload.RecipientInfo;
 import net.nemisolv.identity.payload.auth.*;
+import net.nemisolv.identity.payload.profile.CreateOrUpdateUserProfile;
+import net.nemisolv.identity.payload.profile.UserProfileResponse;
+import net.nemisolv.identity.payload.user.FullUserInfoResponse;
 import net.nemisolv.identity.repository.ConfirmationEmailRepository;
 import net.nemisolv.identity.repository.RoleRepository;
 import net.nemisolv.identity.repository.UserRepository;
+import net.nemisolv.identity.repository.http.UserProfileClient;
 import net.nemisolv.identity.security.UserPrincipal;
 import net.nemisolv.identity.security.context.AuthContext;
 import net.nemisolv.identity.service.AuthService;
@@ -51,7 +55,6 @@ import java.util.Optional;
 
 import static net.nemisolv.lib.util.Constants.*;
 
-// fix email expire time
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -65,6 +68,7 @@ public class AuthServiceImpl implements AuthService {
     private final ConfirmationEmailRepository confirmationEmailRepo;
     private final UserHelper userHelper;
     private final UserMapper userMapper;
+    private final UserProfileClient userProfileClient;
 
     @Value("${app.secure.auth_secret}")
     private String authSecret;
@@ -129,12 +133,32 @@ public class AuthServiceImpl implements AuthService {
         if (currentUser.getRole().getName().equals(RoleName.ADMIN)) {
             // Admin có thể gán bất kỳ role nào
             User newUser = createUser(authRequest, roleToAssign);
-            userRepo.save(newUser);
+            User savedUser = userRepo.save(newUser);
+            UserProfileResponse userProfileResponse = userProfileClient.createOrUpdateUserProfile(
+                    CreateOrUpdateUserProfile.builder()
+                            .name(authRequest.getName())
+                            .userId(savedUser.getId().toString())
+                            .email(authRequest.getEmail())
+                            .build()
+            );
+
+
         } else if (currentUser.getRole().getName().equals(RoleName.MANAGER)) {
             // Manager chỉ được gán các role cụ thể
             if (!isAssignableByManager(roleToAssign)) {
                 throw new PermissionException("Managers cannot assign this role.");
             }
+
+            User newUser = createUser(authRequest, roleToAssign);
+            User savedUser = userRepo.save(newUser);
+            UserProfileResponse userProfileResponse = userProfileClient.createOrUpdateUserProfile(
+                    CreateOrUpdateUserProfile.builder()
+                            .name(authRequest.getName())
+                            .userId(savedUser.getId().toString())
+                            .email(authRequest.getEmail())
+                            .build()
+            );
+
         } else {
             throw new PermissionException("Unauthorized to assign roles.");
         }
@@ -172,19 +196,7 @@ public class AuthServiceImpl implements AuthService {
         confirmationEmailRepo.save(confirmationEmail);
     }
 
-//    @Override
-//    public void verifyEmail(String token) {
-//        ConfirmationEmail confirmationEmail = validateConfirmationEmail(token);
 //
-//        User user = userRepo.findById(confirmationEmail.getUserId())
-//                .orElseThrow(() -> new BadRequestException(ResultCode.USER_NOT_FOUND));
-//
-//        user.setEmailVerified(true);
-//        confirmationEmail.setConfirmedAt(LocalDateTime.now());
-//
-//        userRepo.save(user);
-//        confirmationEmailRepo.save(confirmationEmail);
-//    }
 
     @Override
     public void forgotPassword(String email) throws NoSuchAlgorithmException {
@@ -217,11 +229,13 @@ public class AuthServiceImpl implements AuthService {
 
         // TODO: Implement email sending logic
 
+        UserProfileResponse userProfileResponse = userProfileClient.getUserProfile(user.getId().toString());
+
 
         authProducer.sendForgotPasswordEmail(new SendMailWithOtpToken(
                 RecipientInfo.builder()
                         .email(user.getEmail())
-                        .name(user.getName())
+                        .name(userProfileResponse.getName())
                         .build()
                 ,
                 OtpTokenOptional.builder()
@@ -296,8 +310,19 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtService.generateToken(userPrincipal);
         String refreshToken = jwtService.generateRefreshToken(userPrincipal);
 
+        UserProfileResponse userProfileResponse = userProfileClient.getUserProfile(user.getId().toString());
+
         return AuthenticationResponse.builder()
-                .userData(userMapper.toFullUserInfo(user))
+                .userData(FullUserInfoResponse.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .name(userProfileResponse.getName())
+                        .emailVerified(user.isEmailVerified())
+                        .imgUrl(userProfileResponse.getImgUrl())
+                        .role(userMapper.toRoleResponse(user))
+                        .authProvider(user.getAuthProvider().toString())
+                        .build())
                 .accessToken(token)
                 .refreshToken(refreshToken)
                 .accessTokenExpiry(jwtService.extractTokenExpire(token).getTime())
@@ -323,9 +348,12 @@ public class AuthServiceImpl implements AuthService {
         sendVerificationEmail(newUser);
     }
 
-    private void sendVerificationEmail(User user) throws MessagingException, NoSuchAlgorithmException {
+    private void sendVerificationEmail(User user ) throws MessagingException, NoSuchAlgorithmException {
         String otp = CommonUtil.getRandomNum();  // 6 digits
         String token = CryptoUtil.sha256Hash(otp + authSecret);
+
+        UserProfileResponse userProfileResponse = userProfileClient.getUserProfile(user.getId().toString());
+
 
         ConfirmationEmail confirmationEmail = ConfirmationEmail.builder()
                 .token(token)
@@ -340,7 +368,7 @@ public class AuthServiceImpl implements AuthService {
         authProducer.sendConfirmationRegistrationUser(new SendMailWithOtpToken(
                 new RecipientInfo(
                         user.getEmail(),
-                        user.getName()
+                        userProfileResponse.getName()
                 ),
                 new OtpTokenOptional(
                         otp,
@@ -356,16 +384,22 @@ public class AuthServiceImpl implements AuthService {
                 .email(authRequest.getEmail())
                 .username(userHelper.generateUsername(authRequest.getName()))
                 .password(passwordEncoder.encode(authRequest.getPassword()))
-                .name(authRequest.getName())
                 .emailVerified(false)
                 .enabled(true)
                 .authProvider(AuthProvider.LOCAL)
                 .role(role)
                 .build();
+
+
+
+
     }
 
     private void updateExistingUser(User user, RegisterRequest authRequest) {
-        user.setName(authRequest.getName());
+
+
+
+
         user.setPassword(passwordEncoder.encode(authRequest.getPassword()));
 
         confirmationEmailRepo.findByTypeAndUserId(MailType.REGISTRATION_CONFIRMATION, user.getId())
@@ -375,6 +409,16 @@ public class AuthServiceImpl implements AuthService {
                 });
 
         userRepo.save(user);
+
+
+        UserProfileResponse userProfileResponse = userProfileClient.createOrUpdateUserProfile(
+                CreateOrUpdateUserProfile.builder()
+                        .name(authRequest.getName())
+                        .userId(user.getId().toString())
+                        .email(authRequest.getEmail())
+                        .build()
+        );
+
     }
 
     private ConfirmationEmail validateConfirmationEmail(String token) {

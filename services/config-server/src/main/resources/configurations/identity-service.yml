@@ -111,4 +111,5 @@ app:
       - /auth/**
       - /oauth2/**
       - /identity/oauth2/**
-
+  profile-service:
+    url: http://localhost:8090

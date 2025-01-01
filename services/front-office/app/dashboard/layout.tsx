@@ -14,7 +14,7 @@ export default async function layout({children}: {children: React.ReactNode}) {
         {/* <DashboardHeader/> */}
 
         <AppSidebar />
-        <main>
+        <main className="w-full h-full">
         <SidebarTrigger />
         {children}
       </main>

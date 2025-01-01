@@ -4,6 +4,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
@@ -16,7 +17,7 @@ import Link from "next/link"
 import { Routes } from "@/constants/routes"
 import { Logo } from "../ui/logo"
 import { NavMain } from "../sidebar/nav-main"
-import { Boxes, ChartBarStacked, ChevronUp,  PackageSearch,  Settings,  Target, Users } from "lucide-react"
+import { Bell, Boxes, ChartBarStacked, ChevronUp,  Home,  PackageSearch,  Settings,  Target, Users } from "lucide-react"
 
 // Menu items.
 
@@ -44,6 +45,18 @@ const data = {
           url: "#",
           icon: PackageSearch
         },
+
+        {
+          title: "Inventory",
+          url: "#",
+          icon: PackageSearch
+        },
+
+        {
+          title: "Customers",
+          url: "#",
+          icon: Users
+        },
         {
           title: "Users",
           url: "#",
@@ -53,16 +66,42 @@ const data = {
     },
   ],
   
-  navSecondary: {
-    title: "Settings",
-    url: "#",
-    icon: Settings
-  }
+ 
 }
+
+const items = [
+  {
+    title: "Home",
+    url: "/dashboard/management",
+    icon: Home,
+  },
+  {
+    title: "Notofication",
+    url: "#",
+    icon: Bell,
+  },
+  // {
+  //   title: "Calendar",
+  //   url: "#",
+  //   icon: Calendar,
+  // },
+  // {
+  //   title: "Search",
+  //   url: "#",
+  //   icon: Search,
+  // },
+  {
+    title: "Settings",
+    url: "dashboard/settings",
+    icon: Settings,
+  },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const {currentUser} = useCurrentUser();
+
+  
   if(!currentUser) return null;
   console.log("🚀 ~ currentUser", currentUser)
   return (
@@ -78,6 +117,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupLabel>
           <SidebarContent>
           <NavMain items={data.navMain} />
+
+          <SidebarGroup >
+          <SidebarMenu >
+              {items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild >
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+        </SidebarGroup >
           </SidebarContent>
 
       {/* sidebar footer */}
@@ -88,7 +142,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton>
-                    <UserAvatar className="size-3 md:size-6" src={currentUser.imgUrl} />
+                    <UserAvatar className="size-6" src={currentUser.imgUrl} />
                     {/* <User2 />   */}
                     {currentUser.name}
                     <ChevronUp className="ml-auto" />

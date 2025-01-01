@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.0</version>
+        <version>3.3.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -22,6 +22,7 @@
         <module>discovery-service</module>
         <module>gateway</module>
         <module>identity-service</module>
+        <module>profile-service</module>
         <module>common-lib</module>
         <module>notification-service</module>
         <module>product-service</module>
@@ -42,7 +43,7 @@
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <org.lombok.version>1.18.30</org.lombok.version>
-        <spring-cloud.version>2023.0.3</spring-cloud.version>
+        <spring-cloud.version>2023.0.4</spring-cloud.version>
 
 
     </properties>

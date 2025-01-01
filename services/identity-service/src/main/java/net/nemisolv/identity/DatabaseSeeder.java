@@ -69,9 +69,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .enabled(true)
                     .emailVerified(true)
                     .authProvider(AuthProvider.LOCAL)
-                    .address("123 Manager St, Manager City")
-                    .phoneNumber("1234567890")
-                    .name("Jane")
                     .build();
 
             manager = userRepository.save(manager); // Save manager user
@@ -86,9 +83,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .enabled(true)
                     .emailVerified(true)
                     .authProvider(AuthProvider.LOCAL)
-                    .address("123 Staff St, Staff City")
-                    .phoneNumber("9876543210")
-                    .name("Smith")
                     .build();
 
             staff = userRepository.save(staff); // Save staff user
@@ -103,9 +97,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .enabled(true)
                     .emailVerified(true)
                     .authProvider(AuthProvider.LOCAL)
-                    .address("123 Assistant St, Assistant City")
-                    .phoneNumber("5555555555")
-                    .name("Doe")
                     .build();
 
             assistant = userRepository.save(assistant); // Save assistant user
@@ -241,9 +232,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .enabled(true)
                     .emailVerified(true)
                     .authProvider(AuthProvider.LOCAL)
-                    .address("123 Admin St, Admin City")
-                    .phoneNumber("1234567890")
-                    .name("John")
                     .build();
 
             userRepository.save(admin);

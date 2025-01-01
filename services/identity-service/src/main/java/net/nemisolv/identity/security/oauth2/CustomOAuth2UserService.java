@@ -4,8 +4,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.nemisolv.identity.entity.User;
 import net.nemisolv.identity.helper.UserHelper;
+import net.nemisolv.identity.payload.profile.CreateOrUpdateUserProfile;
 import net.nemisolv.identity.repository.RoleRepository;
 import net.nemisolv.identity.repository.UserRepository;
+import net.nemisolv.identity.repository.http.UserProfileClient;
 import net.nemisolv.identity.security.UserPrincipal;
 import net.nemisolv.identity.security.oauth2.user.OAuth2UserInfo;
 import net.nemisolv.identity.security.oauth2.user.OAuth2UserInfoFactory;
@@ -29,6 +31,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepo;
     private final UserHelper userHelper;
 private final RoleRepository roleRepo;
+private final UserProfileClient userProfileClient;
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -74,22 +77,39 @@ private final RoleRepository roleRepo;
 
         User user = new User();
 
-        user.setName(oauth2UserInfo.getName());
+
         user.setEmail(oauth2UserInfo.getEmail());
         String username = userHelper.generateUsername(oauth2UserInfo.getName());
         user.setUsername(username);
         user.setEmailVerified(true);
         user.setAuthProvider(AuthProvider.getEnum(userRequest.getClientRegistration().getRegistrationId()));
         user.setProviderId(oauth2UserInfo.getId());
-        user.setImgUrl(oauth2UserInfo.getImageUrl());
         user.setEnabled(true);
         user.setRole(roleRepo.findByName(RoleName.CUSTOMER).orElseThrow(() -> new RuntimeException("User Role not set.")));
-        return userRepo.save(user);
+        User savedUser = userRepo.save(user);
+        userProfileClient.createOrUpdateUserProfile(
+                CreateOrUpdateUserProfile.builder()
+                        .name(oauth2UserInfo.getName())
+                        .imgUrl(oauth2UserInfo.getImageUrl())
+                        .userId(savedUser.getId().toString())
+                        .build()
+        );
+        return savedUser;
     }
 
     private User updateExistingUser(User existingUser, OAuth2UserInfo oauth2UserInfo, OAuth2UserRequest userRequest) {
         // allow user to update photo
 //        existingUser.setPicture(oauth2UserInfo.getImageUrl());
+
+        userProfileClient.createOrUpdateUserProfile(
+                CreateOrUpdateUserProfile.builder()
+                        .name(oauth2UserInfo.getName())
+                        .imgUrl(oauth2UserInfo.getImageUrl())
+                        .userId(existingUser.getId().toString())
+                        .build()
+        );
+
+
         existingUser.setProviderId(oauth2UserInfo.getId());
         existingUser.setAuthProvider(AuthProvider.getEnum(userRequest.getClientRegistration().getRegistrationId()));
         return userRepo.save(existingUser);

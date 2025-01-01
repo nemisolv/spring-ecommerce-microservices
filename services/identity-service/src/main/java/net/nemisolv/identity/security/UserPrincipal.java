@@ -45,7 +45,6 @@ public class UserPrincipal  implements UserDetails, OAuth2User   {
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .emailVerified(user.isEmailVerified())
-                .imgUrl(user.getImgUrl())
                 .active(user.isEnabled())
                 .authorities(authorities)
                 .role(user.getRole())
