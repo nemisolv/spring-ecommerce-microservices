@@ -34,9 +34,10 @@ import {
   verifyEmailWithOtpSchema,
   type VerifyEmailWithOtpSchema,
 } from "@/schemas/auth/verify-email-with-otp-schema";
-import { ResultCode } from "@/constants/api-result-code";
+import { ResultCode, ResultCodeMessages } from "@/constants/api-result-code";
 import {  useRouter } from "next/navigation";
 import { Routes } from "@/constants/routes";
+import ErrorResponse from "@/schemas/ErrorResponse";
 
 export type VerifyEmailCardProps = CardProps & {
   email: string;
@@ -58,7 +59,19 @@ export function VerifyEmailCard({
       toast.success("Email verification resent");
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
-  
+      const errorData = e?.data as ErrorResponse;
+      console.log("🚀 ~ onSubmit ~ errorData::", errorData)
+      if(!errorData) {
+        toast.error((ResultCodeMessages[ResultCode.UNKNOWN_ERROR]))
+        return;
+      }
+      const {code} = errorData;
+      if(!code) return 
+        // if email is already verified
+        if(code === ResultCode.EMAIL_ALREADY_VERIFIED){
+          return router.push(Routes.VerifyEmailSuccess);
+        }
+
       toast.error("Couldn't resend verification");
     }
     setIsResendingEmailVerification(false);

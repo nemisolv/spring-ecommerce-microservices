@@ -3,6 +3,8 @@ package net.nemisolv.notificationservice.kafka.consumer;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.nemisolv.lib.event.dto.NotificationEvent;
+import net.nemisolv.lib.util.Constants;
 import net.nemisolv.notificationservice.kafka.identity.SendMailWithOtpToken;
 import net.nemisolv.notificationservice.notification.Notification;
 import net.nemisolv.notificationservice.notification.NotificationRepository;
@@ -14,8 +16,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 import static java.lang.String.format;
-import static net.nemisolv.notificationservice.notification.NotificationType.CONFIRMATION_REGISTRATION_ACCOUNT;
-import static net.nemisolv.notificationservice.notification.NotificationType.FORGOT_PASSWORD;
+import static net.nemisolv.lib.core._enum.NotificationType.CONFIRM_REGISTRATION_ACCOUNT;
+import static net.nemisolv.lib.core._enum.NotificationType.FORGOT_PASSWORD;
 
 @Service
 @Slf4j
@@ -25,19 +27,25 @@ public class AuthNotificationConsumer {
     private final NotificationRepository repository;
     private final EmailService emailService;
 
-    @KafkaListener(topics = "confirmation-registration-user-topic")
-    public void consumeConfirmationRegistrationUserNotifications(SendMailWithOtpToken sendMailWithOtpToken) throws MessagingException {
-        log.info(format("Consuming the message from confirmation-registration-user-topic Topic:: %s", sendMailWithOtpToken.recipient()));
+    @KafkaListener(topics = Constants.EventConfig.CONFIRM_REGISTRATION_TOPIC)
+    public void consumeConfirmationRegistrationUserNotifications(NotificationEvent notificationEvent) throws MessagingException {
+        log.info(format("Consuming the message from confirmation-registration-user-topic Topic:: %s", notificationEvent.getParams().get(Constants.EventConfig.RECIPIENT_NAME)));
+        RecipientInfo recipientInfo = RecipientInfo.builder()
+                .name(notificationEvent.getParams().get(Constants.EventConfig.RECIPIENT_NAME).toString())
+                .email(notificationEvent.getRecipient())
+                .build();
+
         repository.save(
                 Notification.builder()
-                        .type(CONFIRMATION_REGISTRATION_ACCOUNT)
+                        .type(CONFIRM_REGISTRATION_ACCOUNT)
                         .notificationDate(LocalDateTime.now())
-                        .recipientInfo(sendMailWithOtpToken.recipient())
+                        .recipientInfo(
+                                recipientInfo
+                        )
                         .build()
         );
-        emailService.sendRegistrationConfirmationEmail(
-                sendMailWithOtpToken.recipient(),
-                sendMailWithOtpToken.otpTokenOptional()
+        emailService.sendConfirmRegistrationEmail(
+                notificationEvent
         );
     }
 

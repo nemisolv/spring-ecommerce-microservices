@@ -3,16 +3,14 @@ package net.nemisolv.profileservice.service;
 import net.nemisolv.lib.payload.PagedResponse;
 import net.nemisolv.lib.payload.QueryOption;
 import net.nemisolv.profileservice.payload.CreateOrUpdateUserProfile;
-import net.nemisolv.profileservice.payload.ProfileCreationRequest;
+import net.nemisolv.profileservice.payload.CreateProfileRequest;
 import net.nemisolv.profileservice.payload.UserProfileResponse;
 
-
-import java.util.List;
 
 
 public interface UserProfileService {
 
-    UserProfileResponse createProfile(ProfileCreationRequest request) ;
+    UserProfileResponse createProfile(CreateProfileRequest request) ;
 
     UserProfileResponse getProfile(String id) ;
 

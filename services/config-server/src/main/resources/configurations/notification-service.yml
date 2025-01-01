@@ -20,7 +20,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: '*'
-        spring.json.type.mapping: orderConfirmation:net.nemisolv.notificationservice.kafka.order.OrderConfirmation,paymentConfirmation:net.nemisolv.notificationservice.kafka.payment.PaymentConfirmation, sendMailWithToken:net.nemisolv.notificationservice.kafka.identity.SendMailWithOtpToken
+        spring.json.type.mapping: orderConfirmation:net.nemisolv.notificationservice.kafka.order.OrderConfirmation,paymentConfirmation:net.nemisolv.notificationservice.kafka.payment.PaymentConfirmation, notificationEvent:net.nemisolv.lib.event.dto.NotificationEvent
 
 
 

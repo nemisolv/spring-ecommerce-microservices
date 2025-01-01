@@ -10,7 +10,7 @@ import net.nemisolv.lib.util.ResultCode;
 import net.nemisolv.profileservice.entity.UserProfile;
 import net.nemisolv.profileservice.mapper.UserProfileMapper;
 import net.nemisolv.profileservice.payload.CreateOrUpdateUserProfile;
-import net.nemisolv.profileservice.payload.ProfileCreationRequest;
+import net.nemisolv.profileservice.payload.CreateProfileRequest;
 import net.nemisolv.profileservice.payload.UserProfileResponse;
 import net.nemisolv.profileservice.repository.UserProfileRepository;
 import net.nemisolv.profileservice.service.UserProfileService;
@@ -18,13 +18,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.management.Query;
-import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,12 +32,23 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserProfileMapper userProfileMapper;
 
-    public UserProfileResponse createProfile(ProfileCreationRequest request) {
-        UserProfile userProfile = userProfileMapper.toUserProfile(request);
-        userProfile = userProfileRepository.save(userProfile);
-
-        return userProfileMapper.toUserProfileResponse(userProfile);
+    @Override
+    public UserProfileResponse createProfile(CreateProfileRequest request) {
+    Optional<UserProfile> existingProfile = userProfileRepository.findByUserId(request.getUserId());
+    if (existingProfile.isPresent()) {
+        UserProfile profile = existingProfile.get();
+        profile.setName(request.getName());
+        profile.setUsername(request.getUsername());
+        profile.setEmail(request.getEmail());
+        userProfileRepository.save(profile);
+        return userProfileMapper.toUserProfileResponse(profile);
     }
+
+    UserProfile userProfile = userProfileMapper.toUserProfile(request);
+    userProfile = userProfileRepository.save(userProfile);
+
+    return userProfileMapper.toUserProfileResponse(userProfile);
+}
 
     public UserProfileResponse getProfile(String id) {
         UserProfile userProfile =

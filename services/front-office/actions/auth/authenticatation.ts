@@ -5,18 +5,16 @@ import { getBaseUrl } from "@/lib/urls/get-base-url";
 import { VerifyEmailWithOtpSchema } from "@/schemas/auth/verify-email-with-otp-schema";
 import { VerifyEmailWithTokenSchema } from "@/schemas/auth/verify-email-with-token-schema";
 import { ApiResponse, ForgotPasswordParams, LoginParams, LoginSuccessResponse, ResendEmailConfirmationParams, ResetPasswordParams, SignUpParams } from "@/types/auth";
-import { saveAuth, saveTokens } from "@/util/authUtil";
+import {  saveTokens } from "@/util/authUtil";
 
 export const authenticate = async (params: LoginParams) => {
     const response = await axiosInstance.post('/identity/auth/login', params) as ApiResponse<LoginSuccessResponse>;
-    const { userData, ...onlyTokenResponse } = response.data;
-    saveTokens(onlyTokenResponse);
-    saveAuth(userData);
+    saveTokens(response.data);
     return response;
 }
 
 export const signUp = async(params: SignUpParams) => {
- return await axiosInstance.post('/auth/register', params);
+ return await axiosInstance.post('/identity/auth/register', params);
     // backend should send email verification
     
 }

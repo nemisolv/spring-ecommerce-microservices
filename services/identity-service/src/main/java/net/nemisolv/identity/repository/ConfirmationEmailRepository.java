@@ -12,11 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ConfirmationEmailRepository extends CrudRepository<ConfirmationEmail, Long> {
-    List<ConfirmationEmail> findByUserId(Long userId);
 
-    Optional<ConfirmationEmail> findByUserIdAndToken(Long userId, String token);
-
-    List<ConfirmationEmail> findByTypeAndUserId(MailType type, Long userId);
+    List<ConfirmationEmail> findByTypeAndIdentifier(MailType type, String identifier);
 
     Optional<ConfirmationEmail> findByToken(String token);
 

@@ -18,6 +18,12 @@ spring:
             - Path=${app.api-prefix}/identity/**,
           filters:
             - StripPrefix=2
+        - id: profile-service
+          uri: lb:http://profile-service
+          predicates:
+            - Path=${app.api-prefix}/profile/**
+          filters:
+            - StripPrefix=2
 
 
 #        - id: customer-service
@@ -47,3 +53,9 @@ spring:
 app:
   identity-url: http://localhost:8051/identity
   api-prefix: /api/v1
+
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0

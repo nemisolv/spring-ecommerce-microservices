@@ -1,9 +1,9 @@
 package net.nemisolv.identity.mapper;
 
 import net.nemisolv.identity.entity.User;
-import net.nemisolv.identity.payload.user.FullUserInfoConstruct;
-import net.nemisolv.identity.payload.user.FullUserInfoResponse;
 import net.nemisolv.identity.payload.user.RoleResponse;
+import net.nemisolv.identity.payload.user.UserResponse;
+import org.mapstruct.Mapper;
 import org.springframework.stereotype.Service;
 
 import java.util.stream.Collectors;
@@ -11,18 +11,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserMapper {
 
-//    public FullUserInfoResponse toFullUserInfo(FullUserInfoConstruct user) {
-//        return new FullUserInfoResponse(
-//                user.id(),
-//                user.username(),
-//                user.email(),
-//                user.getName(),
-//                user.isEmailVerified(),
-//                user.getImgUrl(),
-//                toRoleResponse(user),
-//                user.getAuthProvider().name()
-//        );
-//    }
+
 
     public RoleResponse toRoleResponse(User user) {
         return new RoleResponse(
@@ -31,4 +20,17 @@ public class UserMapper {
                 user.getRole().getPermissions().stream().map(permission -> permission.getName().name()).collect(Collectors.toSet())
         );
     }
+
+
+    public UserResponse toUserResponse(User user) {
+        return UserResponse.builder()
+                .email(user.getEmail())
+                .emailVerified(user.isEmailVerified())
+                .id(user.getId())
+                .username(user.getUsername())
+                .role(toRoleResponse(user))
+
+                .build();
+    }
+
 }

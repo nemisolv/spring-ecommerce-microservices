@@ -58,18 +58,13 @@ export interface ApiResponse<T> {
 export interface TokenResponse extends ApiResponse<TokenResponse> {
     accessToken: string;
     refreshToken: string;
-    accessTokenExpiry: number;
-    refreshTokenExpiry: number;
 }
 
 
 
 export interface LoginSuccessResponse extends ApiResponse<LoginSuccessResponse> {
-    userData: FullInfoUser;
     accessToken: string;
     refreshToken: string;
-    accessTokenExpiry: number;
-    refreshTokenExpiry: number;
 }
 
 

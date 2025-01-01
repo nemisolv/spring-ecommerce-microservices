@@ -33,7 +33,7 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
-        spring.json.type.mapping: sendMailWithToken:net.nemisolv.identity.payload.auth.SendMailWithOtpToken
+        spring.json.type.mapping: notificationEvent:net.nemisolv.lib.event.dto.NotificationEvent
 
 
 
@@ -112,4 +112,4 @@ app:
       - /oauth2/**
       - /identity/oauth2/**
   profile-service:
-    url: http://localhost:8090
+    url: http://localhost:8090/profile

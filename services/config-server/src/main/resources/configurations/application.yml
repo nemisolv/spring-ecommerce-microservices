@@ -13,10 +13,7 @@ spring:
     compatibility-verifier:
       enabled: false
 
-management:
-  tracing:
-    sampling:
-      probability: 1.0
+
 
 logging:
   level:

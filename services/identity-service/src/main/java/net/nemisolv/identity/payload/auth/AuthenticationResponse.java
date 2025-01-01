@@ -13,7 +13,4 @@ import net.nemisolv.identity.payload.user.FullUserInfoResponse;
 public class AuthenticationResponse {
     private String accessToken;
     private String refreshToken;
-    private long accessTokenExpiry;
-    private long refreshTokenExpiry;
-    private FullUserInfoResponse userData;
 }

@@ -4,9 +4,10 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.nemisolv.lib.event.dto.NotificationEvent;
 import net.nemisolv.lib.util.CommonUtil;
+import net.nemisolv.lib.util.Constants;
 import net.nemisolv.notificationservice.kafka.order.Product;
-import net.nemisolv.notificationservice.payload.OtpTokenOptional;
 import net.nemisolv.notificationservice.payload.RecipientInfo;
 import net.nemisolv.notificationservice.service.EmailService;
 import org.springframework.beans.factory.annotation.Value;
@@ -134,24 +135,32 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    @Override
     @Async
-    public void sendRegistrationConfirmationEmail(RecipientInfo recipient, OtpTokenOptional otpTokenOptional) throws MessagingException {
+    public void sendConfirmRegistrationEmail(NotificationEvent notificationEvent) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, UTF_8.name());
         messageHelper.setFrom(senderEmail);
 
-        final String templateName = CUSTOMER_REGISTRATION.getTemplate();
+        final String templateName = ACCOUNT_REGISTRATION.getTemplate();
+
+        RecipientInfo recipient = RecipientInfo.builder()
+                .name(notificationEvent.getParams().get(Constants.EventConfig.RECIPIENT_NAME).toString())
+                .email(notificationEvent.getRecipient())
+                .build();
+
+        String token = notificationEvent.getParams().get(Constants.EventConfig.TOKEN_URL).toString();
+        String otp = notificationEvent.getParams().get(Constants.EventConfig.OTP).toString();
+
 
         Map<String, Object> variables = new HashMap<>();
         variables.put("recipientName", recipient.name());
-        String urlVerification = CommonUtil.buildEmailUrl("/auth/verify-email/request", otpTokenOptional.token());
+        String urlVerification = CommonUtil.buildEmailUrl("/auth/verify-email/request", token);
         variables.put("url", urlVerification);
-        variables.put("otp", otpTokenOptional.otp());
+        variables.put("otp", otp);
 
         Context context = new Context();
         context.setVariables(variables);
-        messageHelper.setSubject(CUSTOMER_REGISTRATION.getSubject());
+        messageHelper.setSubject(ACCOUNT_REGISTRATION.getSubject());
 
         try {
             String htmlTemplate = templateEngine.process(templateName, context);

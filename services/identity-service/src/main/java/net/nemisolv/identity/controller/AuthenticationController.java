@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.nemisolv.identity.payload.auth.*;
 import net.nemisolv.identity.service.AuthService;
+import net.nemisolv.identity.service.UserService;
 import net.nemisolv.lib.payload.ApiResponse;
 import net.nemisolv.lib.util.CryptoUtil;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,8 @@ import java.security.NoSuchAlgorithmException;
 public class AuthenticationController {
     private final AuthService authService;
 
+    private final UserService userService;
+
     @Value("${app.secure.auth_secret}")
     private String authSecret;
 
@@ -32,8 +35,8 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<Void> register(@RequestBody @Valid RegisterRequest authRequest) throws MessagingException, NoSuchAlgorithmException {
-        authService.registerExternal(authRequest);
+    public ApiResponse<Void> register(@RequestBody @Valid CreateUserRequest authRequest) throws MessagingException, NoSuchAlgorithmException {
+        userService.createUser(authRequest);
         return ApiResponse.success();
     }
 

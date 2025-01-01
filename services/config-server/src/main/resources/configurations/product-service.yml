@@ -13,3 +13,8 @@ spring:
     show-sql: true
 
 
+app:
+  config:
+    inventory-url: http://localhost:8063/inventory
+
+

@@ -10,10 +10,10 @@ const USER_DATA = 'user';
 
 export const saveTokens = 
 (tokenResponse: TokenResponse) => {
-        const  { accessToken, refreshToken, accessTokenExpiry, refreshTokenExpiry } = tokenResponse;
+  const  { accessToken, refreshToken } = tokenResponse;
   if (accessToken && refreshToken)  {
-    Cookies.set(ACCESS_TOKEN, accessToken, {expires: accessTokenExpiry, secure: process.env.NODE_ENV === 'production'}); // secure: true in production
-    Cookies.set(REFRESH_TOKEN, refreshToken, {expires: refreshTokenExpiry, secure: process.env.NODE_ENV === 'production'}); // secure: true in production
+    Cookies.set(ACCESS_TOKEN, accessToken)
+    Cookies.set(REFRESH_TOKEN, refreshToken)
     
   }else {
     Cookies.remove(ACCESS_TOKEN);

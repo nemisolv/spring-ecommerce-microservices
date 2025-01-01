@@ -15,6 +15,8 @@ public enum ResultCode {
     SERVER_BUSY(400, "Server is busy, please try again later"),
     BAD_REQUEST(400, "Bad request"),
 
+    DIRTY_DATA(4005, "Data is dirty, please refresh and try again"),
+
     // User-related errors
     USER_SESSION_EXPIRED(20004, "User session has expired, please log in again"),
     INSUFFICIENT_PERMISSIONS(20005, "Insufficient permissions"),

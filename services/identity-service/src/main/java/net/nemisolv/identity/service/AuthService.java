@@ -10,10 +10,7 @@ import java.security.NoSuchAlgorithmException;
 
 public interface AuthService {
     AuthenticationResponse authenticate(AuthenticationRequest authRequest);
-    void registerExternal(RegisterRequest authRequest) throws MessagingException, NoSuchAlgorithmException;
 
-    // this method is used only by the manager or admin to register a new employee, it is not exposed to the public
-    void registerInternal(RegisterInternalRequest authRequest) ;
     void refreshToken(HttpServletRequest req, HttpServletResponse res) throws IOException;
 
     void verifyEmail(String token) ;

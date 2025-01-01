@@ -15,8 +15,8 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static net.nemisolv.notificationservice.notification.NotificationType.ORDER_CONFIRMATION;
-import static net.nemisolv.notificationservice.notification.NotificationType.PAYMENT_CONFIRMATION;
+import static net.nemisolv.lib.core._enum.NotificationType.PASSWORD_RESET;
+import static net.nemisolv.lib.core._enum.NotificationType.PAYMENT_CONFIRMATION;
 
 @Service
 @Slf4j
@@ -49,7 +49,7 @@ public class OrderNotificationConsumer {
         log.info(format("Consuming the message from order-created-topic Topic:: %s", orderConfirmation));
         repository.save(
                 Notification.builder()
-                        .type(ORDER_CONFIRMATION)
+                        .type(PASSWORD_RESET)
                         .notificationDate(LocalDateTime.now())
                         .details(Map.of("orderConfirmation", orderConfirmation))
                         .build()

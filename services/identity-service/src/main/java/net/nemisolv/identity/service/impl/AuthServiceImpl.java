@@ -3,7 +3,6 @@ package net.nemisolv.identity.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nemisolv.identity.entity.ConfirmationEmail;
@@ -11,16 +10,11 @@ import net.nemisolv.identity.entity.Role;
 import net.nemisolv.identity.entity.User;
 import net.nemisolv.identity.exception.BadCredentialException;
 import net.nemisolv.identity.exception.BadRequestException;
-import net.nemisolv.identity.exception.PermissionException;
-import net.nemisolv.identity.exception.ResourceNotFoundException;
 import net.nemisolv.identity.helper.UserHelper;
 import net.nemisolv.identity.kafka.AuthProducer;
 import net.nemisolv.identity.mapper.UserMapper;
-import net.nemisolv.identity.payload.RecipientInfo;
 import net.nemisolv.identity.payload.auth.*;
-import net.nemisolv.identity.payload.profile.CreateOrUpdateUserProfile;
 import net.nemisolv.identity.payload.profile.UserProfileResponse;
-import net.nemisolv.identity.payload.user.FullUserInfoResponse;
 import net.nemisolv.identity.repository.ConfirmationEmailRepository;
 import net.nemisolv.identity.repository.RoleRepository;
 import net.nemisolv.identity.repository.UserRepository;
@@ -29,14 +23,10 @@ import net.nemisolv.identity.security.UserPrincipal;
 import net.nemisolv.identity.security.context.AuthContext;
 import net.nemisolv.identity.service.AuthService;
 import net.nemisolv.identity.service.JwtService;
-import net.nemisolv.lib.core._enum.AuthProvider;
+import net.nemisolv.identity.service.SendMailService;
 import net.nemisolv.lib.core._enum.MailType;
-import net.nemisolv.lib.core._enum.RoleName;
-import net.nemisolv.lib.util.CommonUtil;
-import net.nemisolv.lib.util.CryptoUtil;
 import net.nemisolv.lib.util.ResultCode;
 import net.nemisolv.lib.util.TokenUtil;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.messaging.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -51,7 +41,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static net.nemisolv.lib.util.Constants.*;
 
@@ -61,31 +50,12 @@ import static net.nemisolv.lib.util.Constants.*;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepo;
-    private final RoleRepository roleRepo;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final ConfirmationEmailRepository confirmationEmailRepo;
-    private final UserHelper userHelper;
-    private final UserMapper userMapper;
     private final UserProfileClient userProfileClient;
-
-    @Value("${app.secure.auth_secret}")
-    private String authSecret;
-
-
-    // sending email
-    private final AuthProducer authProducer;
-
-
-//    util
-
-    // don't use static, because it will be called only once and assign time will be fixed -> lead to expire time of email is fixed
-//    private  final Map<MailType, LocalDateTime> mailTypeToExp = Map.of(
-//            MailType.REGISTRATION_CONFIRMATION, getExpTimeRegistrationEmail(),
-//            MailType.PASSWORD_RESET, getExpTimePasswordResetEmail()
-////            MailType.ORDER_CREATED_NOTIFICATION,
-//    );
+    private final SendMailService sendMailService;
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authRequest) {
@@ -106,65 +76,7 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    @Override
-    @Transactional
-    public void registerExternal(RegisterRequest authRequest) throws MessagingException, NoSuchAlgorithmException {
-        Optional<User> existingUser = userRepo.findByEmail(authRequest.getEmail());
 
-        if (existingUser.isPresent()) {
-            handleExistingUserForRegistration(existingUser.get(), authRequest);
-        } else {
-            createAndSendVerificationEmail(authRequest);
-        }
-    }
-
-    @Override
-    public void registerInternal(RegisterInternalRequest authRequest) {
-        if (userRepo.existsByEmail(authRequest.getEmail())) {
-            throw new BadCredentialException(ResultCode.USER_ALREADY_EXISTS);
-        }
-        UserPrincipal currentUser = AuthContext.getCurrentUser();
-//        if(userPrincipal.getAuthorities() )
-
-        Role roleToAssign = roleRepo.findByName(authRequest.getRole())
-                .orElseThrow(() -> new BadRequestException(ResultCode.ROLE_NOT_FOUND));
-
-        // Kiểm tra quyền của user hiện tại
-        if (currentUser.getRole().getName().equals(RoleName.ADMIN)) {
-            // Admin có thể gán bất kỳ role nào
-            User newUser = createUser(authRequest, roleToAssign);
-            User savedUser = userRepo.save(newUser);
-            UserProfileResponse userProfileResponse = userProfileClient.createOrUpdateUserProfile(
-                    CreateOrUpdateUserProfile.builder()
-                            .name(authRequest.getName())
-                            .userId(savedUser.getId().toString())
-                            .email(authRequest.getEmail())
-                            .build()
-            );
-
-
-        } else if (currentUser.getRole().getName().equals(RoleName.MANAGER)) {
-            // Manager chỉ được gán các role cụ thể
-            if (!isAssignableByManager(roleToAssign)) {
-                throw new PermissionException("Managers cannot assign this role.");
-            }
-
-            User newUser = createUser(authRequest, roleToAssign);
-            User savedUser = userRepo.save(newUser);
-            UserProfileResponse userProfileResponse = userProfileClient.createOrUpdateUserProfile(
-                    CreateOrUpdateUserProfile.builder()
-                            .name(authRequest.getName())
-                            .userId(savedUser.getId().toString())
-                            .email(authRequest.getEmail())
-                            .build()
-            );
-
-        } else {
-            throw new PermissionException("Unauthorized to assign roles.");
-        }
-
-
-    }
 
     @Override
     public void refreshToken(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -186,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
     public void verifyEmail(String token) {
         ConfirmationEmail confirmationEmail = validateConfirmationEmail(token);
 
-        User user = userRepo.findById(confirmationEmail.getUserId())
+        User user = userRepo.findByEmail(confirmationEmail.getIdentifier())
                 .orElseThrow(() -> new BadRequestException(ResultCode.USER_NOT_FOUND_OR_DISABLED));
 
         user.setEmailVerified(true);
@@ -208,7 +120,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new BadRequestException(ResultCode.BAD_REQUEST));
 
         ConfirmationEmail resetPasswordConfirmation = ConfirmationEmail.builder()
-                .userId(user.getId())
+                .identifier(email)
                 .token(token)
                 .type(MailType.PASSWORD_RESET)
                 .expiredAt(getExpTimePasswordResetEmail())
@@ -216,7 +128,7 @@ public class AuthServiceImpl implements AuthService {
 
 
         // revoke all previous reset password tokens
-        confirmationEmailRepo.findByTypeAndUserId(MailType.PASSWORD_RESET, user.getId())
+        confirmationEmailRepo.findByTypeAndIdentifier(MailType.PASSWORD_RESET, user.getEmail())
                 .forEach(confirmationEmail -> {
                     confirmationEmail.setRevoked(true);
                     confirmationEmailRepo.save(confirmationEmail);
@@ -232,18 +144,18 @@ public class AuthServiceImpl implements AuthService {
         UserProfileResponse userProfileResponse = userProfileClient.getUserProfile(user.getId().toString());
 
 
-        authProducer.sendForgotPasswordEmail(new SendMailWithOtpToken(
-                RecipientInfo.builder()
-                        .email(user.getEmail())
-                        .name(userProfileResponse.getName())
-                        .build()
-                ,
-                OtpTokenOptional.builder()
-                        .otp(null)
-                        .token(token)
-                        .build()
-
-        ));
+//        authProducer.sendForgotPasswordEmail(new SendMailWithOtpToken(
+//                RecipientInfo.builder()
+//                        .email(user.getEmail())
+//                        .name(userProfileResponse.getName())
+//                        .build()
+//                ,
+//                OtpTokenOptional.builder()
+//                        .otp(null)
+//                        .token(token)
+//                        .build()
+//
+//        ));
     }
 
     @Override
@@ -254,7 +166,7 @@ public class AuthServiceImpl implements AuthService {
         ConfirmationEmail confirmationEmail = validateConfirmationEmail(token);
         confirmationEmail.setConfirmedAt(LocalDateTime.now());
 
-        User user = userRepo.findById(confirmationEmail.getUserId())
+        User user = userRepo.findByEmail(confirmationEmail.getIdentifier())
                 .orElseThrow(() -> new BadRequestException(ResultCode.USER_NOT_FOUND_OR_DISABLED));
 
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -280,15 +192,16 @@ public class AuthServiceImpl implements AuthService {
 
 
 
-        confirmationEmailRepo.findByTypeAndUserId(MailType.REGISTRATION_CONFIRMATION, user.getId())
+        confirmationEmailRepo.findByTypeAndIdentifier(MailType.REGISTRATION_CONFIRMATION, user.getEmail())
                 .forEach(confirmationEmail -> {
                     confirmationEmail.setRevoked(true);
                     confirmationEmailRepo.save(confirmationEmail);
                 });
 
         try {
-            sendVerificationEmail(user);
-        } catch (MessagingException | NoSuchAlgorithmException e) {
+            String name = null; // call to profile service to get the name
+            sendMailService.sendEmailConfirmation(user.getEmail(),name);
+        } catch (MessagingException e) {
             log.error("Error sending email: {}", e.getMessage());
         }
     }
@@ -304,122 +217,18 @@ public class AuthServiceImpl implements AuthService {
      */
 
     private AuthenticationResponse generateAuthResponse(UserPrincipal userPrincipal) {
-        User user = userRepo.findByEmail(userPrincipal.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         String token = jwtService.generateToken(userPrincipal);
         String refreshToken = jwtService.generateRefreshToken(userPrincipal);
 
-        UserProfileResponse userProfileResponse = userProfileClient.getUserProfile(user.getId().toString());
-
         return AuthenticationResponse.builder()
-                .userData(FullUserInfoResponse.builder()
-                        .id(user.getId())
-                        .username(user.getUsername())
-                        .email(user.getEmail())
-                        .name(userProfileResponse.getName())
-                        .emailVerified(user.isEmailVerified())
-                        .imgUrl(userProfileResponse.getImgUrl())
-                        .role(userMapper.toRoleResponse(user))
-                        .authProvider(user.getAuthProvider().toString())
-                        .build())
                 .accessToken(token)
                 .refreshToken(refreshToken)
-                .accessTokenExpiry(jwtService.extractTokenExpire(token).getTime())
-                .refreshTokenExpiry(jwtService.extractTokenExpire(refreshToken).getTime())
                 .build();
     }
 
-    private void handleExistingUserForRegistration(User user, RegisterRequest authRequest) throws MessagingException, NoSuchAlgorithmException {
-        if (user.isEmailVerified()) {
-            throw new BadRequestException(ResultCode.USER_ALREADY_EXISTS);
-        }
-
-        updateExistingUser(user, authRequest);
-        sendVerificationEmail(user);
-    }
-
-    private void createAndSendVerificationEmail(RegisterRequest authRequest) throws MessagingException, NoSuchAlgorithmException {
-        Role customerRole = roleRepo.findByName(RoleName.CUSTOMER).orElseThrow(() -> new ResourceNotFoundException("Role not found"));
-
-        User newUser = createUser(authRequest, customerRole);
-        userRepo.save(newUser);
-
-        sendVerificationEmail(newUser);
-    }
-
-    private void sendVerificationEmail(User user ) throws MessagingException, NoSuchAlgorithmException {
-        String otp = CommonUtil.getRandomNum();  // 6 digits
-        String token = CryptoUtil.sha256Hash(otp + authSecret);
-
-        UserProfileResponse userProfileResponse = userProfileClient.getUserProfile(user.getId().toString());
 
 
-        ConfirmationEmail confirmationEmail = ConfirmationEmail.builder()
-                .token(token)
-                .type(MailType.REGISTRATION_CONFIRMATION)
-                .expiredAt(getExpTimeRegistrationEmail())
-                .userId(user.getId())
-                .build();
-
-        confirmationEmailRepo.save(confirmationEmail);
-//        emailService.sendRegistrationEmail(user, token);
-        // sending mail with kafka producer
-        authProducer.sendConfirmationRegistrationUser(new SendMailWithOtpToken(
-                new RecipientInfo(
-                        user.getEmail(),
-                        userProfileResponse.getName()
-                ),
-                new OtpTokenOptional(
-                        otp,
-                        token
-                )
-        ));
-    }
-
-    private User createUser(RegisterRequest authRequest, Role role) {
-
-
-        return User.builder()
-                .email(authRequest.getEmail())
-                .username(userHelper.generateUsername(authRequest.getName()))
-                .password(passwordEncoder.encode(authRequest.getPassword()))
-                .emailVerified(false)
-                .enabled(true)
-                .authProvider(AuthProvider.LOCAL)
-                .role(role)
-                .build();
-
-
-
-
-    }
-
-    private void updateExistingUser(User user, RegisterRequest authRequest) {
-
-
-
-
-        user.setPassword(passwordEncoder.encode(authRequest.getPassword()));
-
-        confirmationEmailRepo.findByTypeAndUserId(MailType.REGISTRATION_CONFIRMATION, user.getId())
-                .forEach(confirmationEmail -> {
-                    confirmationEmail.setRevoked(true);
-                    confirmationEmailRepo.save(confirmationEmail);
-                });
-
-        userRepo.save(user);
-
-
-        UserProfileResponse userProfileResponse = userProfileClient.createOrUpdateUserProfile(
-                CreateOrUpdateUserProfile.builder()
-                        .name(authRequest.getName())
-                        .userId(user.getId().toString())
-                        .email(authRequest.getEmail())
-                        .build()
-        );
-
-    }
 
     private ConfirmationEmail validateConfirmationEmail(String token) {
         ConfirmationEmail confirmationEmail = confirmationEmailRepo.findByToken(token)
@@ -460,16 +269,5 @@ public class AuthServiceImpl implements AuthService {
         return allowedRolesForManager.contains(role.getName().toString());
     }
 
-//    private void createAndSaveConfirmationEmail(Long userId, String token,MailType mailType) {
-//        ConfirmationEmail confirmationEmail = ConfirmationEmail.builder()
-//                .userId(userId)
-//                .token(token)
-//                .type(mailType)
-//                .expiredAt(mailTypeToExp.get(mailType))
-//                .build();
-//
-//        confirmationEmailRepo.save(confirmationEmail);
-//
-//    }
 
 }

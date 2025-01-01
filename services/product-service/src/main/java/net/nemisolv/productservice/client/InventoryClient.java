@@ -12,7 +12,7 @@ import java.util.Map;
 
 @FeignClient(
         name = "inventory-service",
-        url = "${application.config.inventory-url}"
+        url = "${app.config.inventory-url}"
 )public interface InventoryClient {
 
     @PostMapping("/inventory/check-availability")

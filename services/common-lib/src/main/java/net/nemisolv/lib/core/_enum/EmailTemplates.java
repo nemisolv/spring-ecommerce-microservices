@@ -6,7 +6,10 @@ public enum EmailTemplates {
 
     PAYMENT_CONFIRMATION("payment-confirmation.html", "Payment successfully processed"),
     ORDER_CONFIRMATION("order-confirmation.html", "Order confirmation"),
-    CUSTOMER_REGISTRATION("customer-registration.html", "Welcome to TechShop")
+    CONFIRM_REGISTRATION_ACCOUNT("customer-registration.html", "Welcome to TechShop"),
+    PASSWORD_RESET("password-reset.html", "Password reset")
+
+
     ;
 
     @Getter

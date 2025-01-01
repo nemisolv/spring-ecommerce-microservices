@@ -24,11 +24,12 @@ public class UserHelper {
         String convertedFirstName = normalizeAndRemoveDiacritics(firstName).toLowerCase();
         String convertedLastName = normalizeAndRemoveDiacritics(lastName).toLowerCase();
         String username = convertedFirstName + convertedLastName;
-        if(firstName !=null && (lastName == null || lastName.isEmpty())) {
-            username = convertedFirstName.replace(" ", "");
-        }
+//        if(firstName !=null && (lastName == null || lastName.isEmpty())) {
+//            username = convertedFirstName.replace(" ", "");
+//        }
 
         while(userRepo.findByUsername(username).isPresent()) {
+
             username = username + (int)(Math.random() * 1000);
         }
 
