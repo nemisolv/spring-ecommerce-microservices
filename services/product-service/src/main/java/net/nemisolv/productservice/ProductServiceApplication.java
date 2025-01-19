@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableFeignClients
-@ComponentScan(basePackages = {"net.nemisolv.productservice.mapper"})
+//@ComponentScan(basePackages = {"net.nemisolv.productservice.mapper"})
 public class ProductServiceApplication {
 
 	public static void main(String[] args) {

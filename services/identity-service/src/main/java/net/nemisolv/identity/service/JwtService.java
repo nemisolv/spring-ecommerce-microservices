@@ -7,20 +7,20 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import net.nemisolv.identity.entity.Permission;
+import net.nemisolv.identity.entity.Role;
 import net.nemisolv.identity.entity.User;
 import net.nemisolv.identity.payload.auth.IntrospectRequest;
 import net.nemisolv.identity.payload.auth.IntrospectResponse;
 import net.nemisolv.identity.repository.UserRepository;
 import net.nemisolv.identity.security.UserPrincipal;
 import net.nemisolv.identity.properties.JWTTokenProperties;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -45,8 +45,31 @@ public class JwtService {
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
+
         return buildToken(new HashMap<>(),userDetails, tokenProperties.getRefreshTokenExpireTime());
     }
+
+
+    // because other services use nimbus-jose-jwt library, so we need to custom the token
+    public String buildScope(UserDetails userDetails) {
+        StringJoiner joiner = new StringJoiner(" ");
+//        Role role = userPrincipal.getRole();
+//        Set<Permission> permissions = role.getPermissions();
+//
+//        joiner.add("ROLE_" + role.getName().name());
+//        permissions.forEach(permission -> joiner.add(permission.getName().name()));
+
+        userDetails.getAuthorities().forEach(authority -> {
+            if(authority instanceof SimpleGrantedAuthority) {
+                joiner.add(authority.getAuthority());
+            }
+        });
+
+
+
+        return joiner.toString();
+    }
+
 
 
     public String generateToken(Map<String,Object> extraClaims, UserDetails userDetails) {
@@ -66,7 +89,8 @@ public class JwtService {
 
     private String buildToken(Map<String,Object> extraClaims, UserDetails userDetails, long expire) {
         return Jwts.builder()
-                .setClaims(extraClaims)
+//                .setClaims(extraClaims)
+                .setClaims(Map.of("scope", buildScope(userDetails)))
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expire) )

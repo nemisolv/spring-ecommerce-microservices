@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import net.nemisolv.gateway.AllowedEndpoint;
 import net.nemisolv.gateway.service.IdentityService;
 import net.nemisolv.lib.payload.ApiResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -39,8 +41,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     private String apiPrefix;
 
     @NonFinal
-    private String[] allowedEndpoints = new String[]{"/identity/auth","/identity/oauth2"};
-
+    private List<AllowedEndpoint> allowedEndpoints = List.of(
+            new AllowedEndpoint("/identity/auth", List.of(HttpMethod.POST)),
+            new AllowedEndpoint("/identity/oauth2", List.of(HttpMethod.POST)),
+            new AllowedEndpoint("/products/brands", List.of(HttpMethod.GET))
+    );
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -69,7 +74,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     public boolean isAllowedEndpoint(ServerHttpRequest request) {
         String path = request.getURI().getPath();
-        return Arrays.stream(allowedEndpoints).anyMatch(allow -> path.startsWith(apiPrefix + allow));
+        HttpMethod method = request.getMethod();
+        return allowedEndpoints.stream()
+                .anyMatch(allow -> path.startsWith(apiPrefix + allow.getPath())
+                        && (allow.getMethods().contains(method) || allow.getMethods().contains("*")));
     }
 
     @Override

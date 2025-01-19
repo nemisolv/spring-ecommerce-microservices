@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/categories")
+@RequestMapping("/categories")
 public class CategoryController {
 
     private final CategoryService categoryService;

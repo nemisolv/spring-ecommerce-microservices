@@ -22,6 +22,7 @@ public class UserProfileController {
     UserProfileService userProfileService;
 
     @GetMapping("/{profileId}")
+
     ApiResponse<UserProfileResponse> getProfile(@PathVariable String profileId) {
         return ApiResponse.<UserProfileResponse>builder()
                 .data(userProfileService.getProfile(profileId))
