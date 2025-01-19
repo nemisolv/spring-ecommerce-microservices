@@ -87,14 +87,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                         .ifPresentOrElse(
                                 user -> {
 
-                                    userProfileClient.createOrUpdateUserProfile(
-                                             CreateOrUpdateUserProfile.builder()
-                                                     .imgUrl(oAuth2User.getPicture())
-                                                     .name(oAuth2User.getGivenName() + " " + oAuth2User.getFamilyName())
-                                                        .phoneNumber(oAuth2User.getPhoneNumber())
-                                                     .userId(user.getId().toString())
-                                                     .build()
-                                    );
 
                                     userProfileClient.updateProfile(UpdateProfileRequest.builder()
                                             .name(oAuth2User.getName())

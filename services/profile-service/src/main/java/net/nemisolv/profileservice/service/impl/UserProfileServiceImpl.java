@@ -36,15 +36,12 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public UserProfileResponse createProfile(CreateProfileRequest request) {
-    Optional<UserProfile> existingProfile = userProfileRepository.findByUserId(request.getUserId());
-    if (existingProfile.isPresent()) {
-        UserProfile profile = existingProfile.get();
-        profile.setName(request.getName());
-        profile.setUsername(request.getUsername());
-        profile.setEmail(request.getEmail());
-        if(StringUtils.hasLength(request.getImgUrl())) {
-            profile.setImgUrl(request.getImgUrl());
-        }
+        UserProfile profile = UserProfile.builder()
+                        .name(request.getName())
+                        .username(request.getUsername())
+                        .email(request.getEmail())
+                        .imgUrl(request.getImgUrl())
+                        .build();
 
         if(StringUtils.hasLength(request.getAuthProvider())) {
             profile.setAuthProvider(request.getAuthProvider());
@@ -55,11 +52,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         return userProfileMapper.toUserProfileResponse(profile);
     }
 
-    UserProfile userProfile = userProfileMapper.toUserProfile(request);
-    userProfile = userProfileRepository.save(userProfile);
-
-    return userProfileMapper.toUserProfileResponse(userProfile);
-}
 
     public UserProfileResponse getProfile(String id) {
         UserProfile userProfile =
