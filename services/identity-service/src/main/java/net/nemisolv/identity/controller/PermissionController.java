@@ -3,6 +3,7 @@ package net.nemisolv.identity.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.nemisolv.identity.payload.permission.AssignPermissionToRoleRequest;
+import net.nemisolv.identity.payload.permission.AuthorityResponse;
 import net.nemisolv.identity.payload.permission.PermissionResponse;
 import net.nemisolv.identity.payload.permission.UpdateAssignPermissionToRoleRequest;
 import net.nemisolv.identity.service.PermissionService;
@@ -58,6 +59,11 @@ public class PermissionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ApiResponse<List<PermissionResponse>> updatePermissionsForRole(@PathVariable Long roleId, @RequestBody @Valid UpdateAssignPermissionToRoleRequest request) {
         return ApiResponse.success(permissionService.updatePermissionsForRole(roleId, request.permissionIds()));
+    }
+
+    @GetMapping("/authority/me")
+    public ApiResponse<AuthorityResponse> getMyAuthorities() {
+        return ApiResponse.success(permissionService.getMyAuthorities());
     }
 
 //    @DeleteMapping("/{id}")

@@ -45,6 +45,9 @@ import ErrorResponse from '@/schemas/ErrorResponse';
 import { ResultCode, ResultCodeMessages } from '@/constants/api-result-code';
 import { useRouter } from 'next/navigation';
 import { buildOAuth2Url } from '@/lib/auth/oauth2';
+import { getProfile } from '@/actions/profile/get-profile';
+import {  saveAuthority, saveUser } from '@/util/authUtil';
+import { getMyAuthority } from '@/actions/permission/get-authority';
 
 
 
@@ -73,9 +76,11 @@ export function LoginCard(props: CardProps): React.JSX.Element {
     }
     try {
       setIsLoading(true);
-      const result = await authenticate(values) 
-      console.log("🚀 ~ onSubmit ~ result::", result)
-      
+      await authenticate(values) 
+      const profile = await getProfile();
+      saveUser(profile?.data);
+      const myAuthority = await getMyAuthority();
+      saveAuthority(myAuthority?.data); 
       router.push(Routes.Home)
      
 
@@ -89,6 +94,13 @@ export function LoginCard(props: CardProps): React.JSX.Element {
       }
       const {code} = errorData;
       if(!code) return 
+
+      if(code === ResultCode.AUTHENTICATION_FAILED) {
+        setErrorMessage(ResultCodeMessages[code]);
+        return;
+      }
+
+
         // if not verified => auto verify
         setUnverifiedEmail(code === ResultCode.EMAIL_NOT_VERIFIED ? values.email : undefined);
         setErrorMessage(ResultCodeMessages[code in ResultCodeMessages ? code as ResultCode : ResultCode.UNKNOWN_ERROR]);

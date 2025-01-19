@@ -1,4 +1,5 @@
-import { FullInfoUser, TokenResponse } from '@/types/auth';
+import { FullInfoUser, RoleResponse, TokenResponse } from '@/types/auth';
+import { MyProfileResponse } from '@/types/profile';
 import Cookies from 'js-cookie';
 
 
@@ -6,6 +7,7 @@ const ACCESS_TOKEN = 'techshop_access_token';
 const REFRESH_TOKEN= 'techshop_refresh_token';
 
 const USER_DATA = 'user';
+const AUTHORITY = 'authority';
 
 
 export const saveTokens = 
@@ -49,6 +51,16 @@ export const getAuth = () => {
 export const saveAuth = (userData:FullInfoUser )=> {
   Cookies.set(USER_DATA, JSON.stringify(userData), {secure: process.env.NODE_ENV === 'production'}); // secure: true in production
 }
+
+
+export const saveUser = (userData: MyProfileResponse) => {
+  Cookies.set(USER_DATA, JSON.stringify(userData), {secure: process.env.NODE_ENV === 'production'}); // secure: true in production
+}
+
+export const saveAuthority = (authority : RoleResponse) => {
+  Cookies.set(AUTHORITY, JSON.stringify(authority), {secure: process.env.NODE_ENV === 'production'}); // secure: true in production
+}
+
 
 export const logOut = () => {
  

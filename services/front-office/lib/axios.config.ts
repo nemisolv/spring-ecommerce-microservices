@@ -6,8 +6,8 @@ import axios from 'axios';
 
 
 const publicApiEndpoint = [
-    Routes.Login,
-    Routes.SignUp
+    "/identity"+Routes.Login,
+    "/identity"+Routes.SignUp
 ]
 
 

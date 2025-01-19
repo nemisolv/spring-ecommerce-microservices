@@ -86,9 +86,15 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     public UserProfileResponse getMyProfile() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new BusinessException(ResultCode.USER_NOT_FOUND_OR_DISABLED);
+        }
+
+
         String userId = authentication.getName();
 
-        var profile = userProfileRepository.findByUserId(userId)
+        var profile = userProfileRepository.findByEmail(userId)
                 .orElseThrow(() -> new BusinessException(ResultCode.USER_NOT_FOUND_OR_DISABLED));
 
         return userProfileMapper.toUserProfileResponse(profile);

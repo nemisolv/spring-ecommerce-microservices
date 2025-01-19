@@ -26,6 +26,10 @@ public class SecurityConfig {
         this.customJwtDecoder = customJwtDecoder;
     }
 
+
+    // except identity-service, all other services are only responsible for authorizing requests,
+    // the authentication workflow is handled by the identity-service
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)

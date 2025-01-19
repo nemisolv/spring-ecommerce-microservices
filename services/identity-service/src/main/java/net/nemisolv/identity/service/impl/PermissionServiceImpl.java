@@ -7,6 +7,7 @@ import net.nemisolv.identity.entity.Role;
 import net.nemisolv.identity.helper.AccessHelper;
 import net.nemisolv.identity.mapper.PermissionMapper;
 import net.nemisolv.identity.payload.permission.AssignPermissionToRoleRequest;
+import net.nemisolv.identity.payload.permission.AuthorityResponse;
 import net.nemisolv.identity.payload.permission.PermissionResponse;
 import net.nemisolv.identity.repository.PermissionRepository;
 import net.nemisolv.identity.repository.RoleRepository;
@@ -26,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -189,5 +191,21 @@ public class PermissionServiceImpl implements PermissionService {
                 .map(permissionMapper::toResponse)
                 .toList();
 
+    }
+
+    @Override
+    public AuthorityResponse getMyAuthorities() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication == null || !authentication.isAuthenticated()) {
+            throw new AccessDeniedException("Access denied");
+        }
+        var role = AuthContext.getCurrentUser().getRole();
+        return AuthorityResponse.builder()
+                .roleId(String.valueOf(role.getId()))
+                .roleName(role.getName().name())
+                .permissions(role.getPermissions().stream()
+                        .map(permission -> permission.getName().name())
+                        .toList())
+                .build();
     }
 }

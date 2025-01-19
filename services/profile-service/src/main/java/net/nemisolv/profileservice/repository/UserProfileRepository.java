@@ -12,6 +12,8 @@ public interface UserProfileRepository extends MongoRepository<UserProfile, Stri
 
     Optional<UserProfile> findByUserId(String userId);
 
+    Optional<UserProfile> findByEmail(String email);
+
 
     @Query("{ '$text': { '$search': ?0 } }")
     Page<UserProfile> searchProfile(String searchQuery, Pageable pageable);

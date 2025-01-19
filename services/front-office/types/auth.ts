@@ -81,7 +81,7 @@ export interface FullInfoUser {
 }
 
 export interface RoleResponse {
-    id: number;
+    id: string;
     name: RoleEnum;
     permissions: Set<string>;
 }

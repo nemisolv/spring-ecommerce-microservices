@@ -23,7 +23,7 @@ public class UserHelper {
         // Normalize the names to decompose the characters
         String convertedFirstName = normalizeAndRemoveDiacritics(firstName).toLowerCase();
         String convertedLastName = normalizeAndRemoveDiacritics(lastName).toLowerCase();
-        String username = convertedFirstName + convertedLastName;
+        String username = (convertedFirstName + convertedLastName).replace(" ", "");
 //        if(firstName !=null && (lastName == null || lastName.isEmpty())) {
 //            username = convertedFirstName.replace(" ", "");
 //        }

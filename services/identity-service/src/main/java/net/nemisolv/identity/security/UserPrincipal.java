@@ -32,6 +32,7 @@ public class UserPrincipal  implements UserDetails, OAuth2User   {
     private Map<String, Object> attributes;
     private Collection<? extends GrantedAuthority> authorities;
 
+    @Getter
     private Role role;
 
 

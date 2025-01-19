@@ -3,6 +3,10 @@
 Spring E-Commerce Microservices
 ===============================
 
+
+
+
+
 This repository contains a set of microservices built using Spring Boot for an E-Commerce platform. These microservices are designed to work together to provide a scalable and robust architecture for handling various aspects of an online store.
 
 Microservices Included
