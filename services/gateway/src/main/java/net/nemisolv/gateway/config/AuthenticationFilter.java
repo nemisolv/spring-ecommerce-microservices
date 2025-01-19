@@ -44,7 +44,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     private List<AllowedEndpoint> allowedEndpoints = List.of(
             new AllowedEndpoint("/identity/auth", List.of(HttpMethod.POST)),
             new AllowedEndpoint("/identity/oauth2", List.of(HttpMethod.POST)),
-            new AllowedEndpoint("/products/brands", List.of(HttpMethod.GET))
+            new AllowedEndpoint("/products/brands", List.of(HttpMethod.GET)),
+            new AllowedEndpoint("/products/categories", List.of(HttpMethod.GET)),
+            new AllowedEndpoint("/products", List.of(HttpMethod.GET))
     );
 
     @Override

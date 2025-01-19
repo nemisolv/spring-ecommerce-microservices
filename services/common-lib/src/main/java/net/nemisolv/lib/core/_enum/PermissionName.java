@@ -43,7 +43,12 @@ public enum PermissionName {
     CREATE_BRAND("CREATE_BRAND", "Can create brands"),
     UPDATE_BRAND("UPDATE_BRAND", "Can update brands"),
     DELETE_BRAND("DELETE_BRAND", "Can delete brands"),
-    VIEW_BRAND("VIEW_BRAND", "Can view brands");
+    VIEW_BRAND("VIEW_BRAND", "Can view brands"),
+
+    // Category Management
+    CREATE_CATEGORY("CREATE_CATEGORY", "Can create categories"),
+    UPDATE_CATEGORY("UPDATE_CATEGORY", "Can update categories"),
+    DELETE_CATEGORY("DELETE_CATEGORY", "Can delete categories");
 
     private final String code;
     private final String description;

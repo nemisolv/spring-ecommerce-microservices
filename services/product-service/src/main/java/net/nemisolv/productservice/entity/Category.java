@@ -18,6 +18,7 @@ import java.util.List;
 @Setter
 @SuperBuilder
 public class Category extends IdBaseEntity {
+    @Column(unique = true)
     private String name;
 
     private String description;

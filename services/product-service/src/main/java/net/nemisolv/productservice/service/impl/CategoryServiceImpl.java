@@ -2,7 +2,9 @@ package net.nemisolv.productservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 
+import net.nemisolv.lib.util.ResultCode;
 import net.nemisolv.productservice.entity.Category;
+import net.nemisolv.productservice.exception.BadRequestException;
 import net.nemisolv.productservice.mapper.CategoryMapper;
 import net.nemisolv.productservice.payload.category.CategoryRequest;
 import net.nemisolv.productservice.payload.category.CategoryResponse;
@@ -42,13 +44,22 @@ public class CategoryServiceImpl implements CategoryService {
         Optional<Category> categoryOptional = categoryRepository.findById(id);
         if(categoryOptional.isPresent()) {
             Category category = categoryOptional.get();
+            // check name
+            categoryRepository.findByNameIgnoreCase(request.name())
+                    .ifPresent(c -> {
+                        if(!c.getId().equals(id)) {
+                            throw new BadRequestException(ResultCode.CATEGORY_NAME_EXISTS);
+                        }
+                    });
+
+
             category.setName(request.name());
             if(StringUtils.hasLength(request.description())) {
                 category.setDescription(request.description());
             }
             return categoryMapper.toResponse(categoryRepository.save(category));
         } else {
-            throw new IllegalArgumentException("Category not found");
+            throw new BadRequestException(ResultCode.CATEGORY_NOT_FOUND);
         }
     }
 
@@ -56,7 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long id) {
         Optional<Category> categoryOptional = categoryRepository.findById(id);
         if(categoryOptional.isEmpty()) {
-            throw new IllegalArgumentException("Category not found");
+            throw new BadRequestException(ResultCode.CATEGORY_NOT_FOUND);
         }
         Category category = categoryOptional.get();
         if(category.getProducts().isEmpty()) {

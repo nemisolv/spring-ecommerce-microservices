@@ -149,7 +149,13 @@ public class DatabaseSeeder implements CommandLineRunner {
                     Permission.builder().name(PermissionName.CREATE_BRAND).description(PermissionName.CREATE_BRAND.getDescription()).build(),
                     Permission.builder().name(PermissionName.UPDATE_BRAND).description(PermissionName.UPDATE_BRAND.getDescription()).build(),
                     Permission.builder().name(PermissionName.DELETE_BRAND).description(PermissionName.DELETE_BRAND.getDescription()).build(),
-                    Permission.builder().name(PermissionName.VIEW_BRAND).description(PermissionName.VIEW_BRAND.getDescription()).build()
+                    Permission.builder().name(PermissionName.VIEW_BRAND).description(PermissionName.VIEW_BRAND.getDescription()).build(),
+
+                    // Category Management
+                    Permission.builder().name(PermissionName.CREATE_CATEGORY).description(PermissionName.CREATE_CATEGORY.getDescription()).build(),
+                    Permission.builder().name(PermissionName.UPDATE_CATEGORY).description(PermissionName.UPDATE_CATEGORY.getDescription()).build(),
+                    Permission.builder().name(PermissionName.DELETE_CATEGORY).description(PermissionName.DELETE_CATEGORY.getDescription()).build()
+
             );
 
             permissionRepository.saveAll(permissions);

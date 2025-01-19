@@ -20,6 +20,8 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
         "/brands/**",
+        "/categories/**",
+        "/**"
     };
 
     private final CustomJwtDecoder customJwtDecoder;
