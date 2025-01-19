@@ -4,8 +4,10 @@ import { axiosInstance } from "@/lib/axios.config";
 import { getBaseUrl } from "@/lib/urls/get-base-url";
 import { VerifyEmailWithOtpSchema } from "@/schemas/auth/verify-email-with-otp-schema";
 import { VerifyEmailWithTokenSchema } from "@/schemas/auth/verify-email-with-token-schema";
-import { ApiResponse, ForgotPasswordParams, LoginParams, LoginSuccessResponse, ResendEmailConfirmationParams, ResetPasswordParams, SignUpParams } from "@/types/auth";
-import {  saveTokens } from "@/util/authUtil";
+import { ApiResponse, ForgotPasswordParams, LoginParams, LoginSuccessResponse, ResendEmailConfirmationParams, ResetPasswordParams, SignUpParams, TokenResponse } from "@/types/auth";
+import {  saveAuthority, saveTokens, saveUser } from "@/util/authUtil";
+import { getProfile } from "../profile/get-profile";
+import { getMyAuthority } from "../permission/get-authority";
 
 export const authenticate = async (params: LoginParams) => {
     const response = await axiosInstance.post('/identity/auth/login', params) as ApiResponse<LoginSuccessResponse>;
@@ -19,17 +21,23 @@ export const signUp = async(params: SignUpParams) => {
     
 }
 
-export const continueWithGoogle = async () => {
-    const url = process.env.NEXT_PUBLIC_API_URL +'/identity/oauth2/authorize/google?redirect_uri=' + `${getBaseUrl()}${Routes.OAuth2Redirect}`;
-    // call to backend
-    await axiosInstance.get(url);
-}
+// export const continueWithGoogle = async () => {
+//     const url = process.env.NEXT_PUBLIC_API_URL +'/identity/oauth2/authorize/google?redirect_uri=' + `${getBaseUrl()}${Routes.OAuth2Redirect}`;
+//     // call to backend
+//     await axiosInstance.get(url);
+
+//       const profile = await getProfile();
+//           console.log("🚀 ~ continueWithGoogle ~ profile::", profile)
+//           saveUser(profile?.data);
+//           const myAuthority = await getMyAuthority();
+//           saveAuthority(myAuthority?.data); 
+// }
 
 export const continueWithFacebook = async () => {
     return null;
 }
 
-export const getAuthResponse = async (): Promise<ApiResponse<LoginSuccessResponse>> => {
+export const getAuthResponse = async (): Promise<ApiResponse<TokenResponse>> => {
     return await axiosInstance.get('/identity/internal-auth/auth-response')
 }
 

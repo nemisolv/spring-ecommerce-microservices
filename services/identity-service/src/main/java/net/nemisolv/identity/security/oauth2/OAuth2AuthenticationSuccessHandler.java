@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.nemisolv.identity.entity.User;
 import net.nemisolv.identity.helper.UserHelper;
 import net.nemisolv.identity.payload.profile.CreateOrUpdateUserProfile;
+import net.nemisolv.identity.payload.profile.CreateProfileRequest;
+import net.nemisolv.identity.payload.profile.UpdateProfileRequest;
 import net.nemisolv.identity.repository.RoleRepository;
 import net.nemisolv.identity.repository.UserRepository;
 import net.nemisolv.identity.repository.http.UserProfileClient;
@@ -65,11 +67,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         log.info("redirectUri: {}", redirectUri);
 
         if(redirectUri.isPresent() && !isAuthorizedRedirectUri(redirectUri.get())) {
-            try {
+//            try {
                 throw new BadRequestException(ResultCode.SERVER_BUSY);
-            } catch (BadRequestException e) {
-                throw new RuntimeException(e);
-            }
+//            } catch (BadRequestException e) {
+//                throw new RuntimeException(e);
+//            }
         }
 
         String targetUrl = redirectUri.orElse(getDefaultTargetUrl());
@@ -94,6 +96,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                                                      .build()
                                     );
 
+                                    userProfileClient.updateProfile(UpdateProfileRequest.builder()
+                                            .name(oAuth2User.getName())
+                                            .username(userHelper.generateUsername(oAuth2User.getName()))
+                                            .imgUrl(oAuth2User.getPicture())
+                                            .userId(user.getId().toString())
+                                            .authProvider(AuthProvider.AZURE.name())
+                                            .build());
+
 
                                     userRepository.save(user);
 
@@ -112,15 +122,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                                     newUser.setEmailVerified(true); // Any defaults or additional settings can be applied
                                     User savedUser = userRepository.save(newUser);
 
-                                    userProfileClient.createOrUpdateUserProfile(
-                                            CreateOrUpdateUserProfile.builder()
-                                                    .imgUrl(oAuth2User.getPicture())
-                                                    .name(oAuth2User.getGivenName() + " " + oAuth2User.getFamilyName())
-                                                    .phoneNumber(oAuth2User.getPhoneNumber())
-                                                    .address(oAuth2User.getAddress().getStreetAddress())
-                                                    .userId(savedUser.getId().toString())
-                                                    .build()
-                                    );
+                                    userProfileClient.createProfile(CreateProfileRequest.builder()
+                                            .email(oAuth2User.getEmail())
+                                            .name(oAuth2User.getName())
+                                            .username(userHelper.generateUsername(oAuth2User.getName()))
+                                            .userId(savedUser.getId().toString())
+                                            .imgUrl(oAuth2User.getPicture())
+                                            .authProvider(AuthProvider.AZURE.name())
+                                            .build());
+
+
                                 }
                         );
 
@@ -136,7 +147,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
 
         String token = jwtService.generateToken((UserDetails) authentication.getPrincipal());
-//        String refreshToken = jwtService.generateRefreshToken((UserDetails) authentication.getPrincipal());
 
 
 // flow -> send back to client only accessToken -> client will use it to get authResponse which is included (access,refresh & userData)

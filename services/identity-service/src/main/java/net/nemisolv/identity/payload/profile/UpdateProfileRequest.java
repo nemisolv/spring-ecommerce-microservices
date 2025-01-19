@@ -1,8 +1,9 @@
-package net.nemisolv.profileservice.payload;
+package net.nemisolv.identity.payload.profile;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
 
 @Setter
 @Getter
@@ -10,14 +11,12 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateProfileRequest
-{
-
+public class UpdateProfileRequest {
     @NotNull(message = "userId is required")
     String userId;
     String username;
     String email;
-    String imgUrl;
     String name;
+    String imgUrl;
     String authProvider;
 }

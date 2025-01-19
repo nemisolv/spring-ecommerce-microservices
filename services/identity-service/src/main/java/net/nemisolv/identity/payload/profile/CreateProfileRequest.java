@@ -18,4 +18,6 @@ public class CreateProfileRequest
     String username;
     String email;
     String name;
+    String imgUrl;
+    String authProvider;
 }

@@ -1,5 +1,6 @@
 package net.nemisolv.profileservice.service.impl;
 
+import cn.hutool.setting.profile.Profile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.nemisolv.lib.core.exception.BadRequestException;
@@ -11,6 +12,7 @@ import net.nemisolv.profileservice.entity.UserProfile;
 import net.nemisolv.profileservice.mapper.UserProfileMapper;
 import net.nemisolv.profileservice.payload.CreateOrUpdateUserProfile;
 import net.nemisolv.profileservice.payload.CreateProfileRequest;
+import net.nemisolv.profileservice.payload.UpdateProfileRequest;
 import net.nemisolv.profileservice.payload.UserProfileResponse;
 import net.nemisolv.profileservice.repository.UserProfileRepository;
 import net.nemisolv.profileservice.service.UserProfileService;
@@ -40,6 +42,15 @@ public class UserProfileServiceImpl implements UserProfileService {
         profile.setName(request.getName());
         profile.setUsername(request.getUsername());
         profile.setEmail(request.getEmail());
+        if(StringUtils.hasLength(request.getImgUrl())) {
+            profile.setImgUrl(request.getImgUrl());
+        }
+
+        if(StringUtils.hasLength(request.getAuthProvider())) {
+            profile.setAuthProvider(request.getAuthProvider());
+        }else {
+            profile.setAuthProvider("LOCAL");
+        }
         userProfileRepository.save(profile);
         return userProfileMapper.toUserProfileResponse(profile);
     }
@@ -122,6 +133,36 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         profile = userProfileRepository.save(profile);
 
+        return userProfileMapper.toUserProfileResponse(profile);
+    }
+
+    @Override
+    public UserProfileResponse updateProfile(UpdateProfileRequest request) {
+        String userId = request.getUserId();
+        if(!StringUtils.hasLength(userId)) {
+            throw new BadRequestException(ResultCode.BAD_REQUEST,"User id is required");
+        }
+
+        UserProfile profile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new BusinessException(ResultCode.USER_NOT_FOUND_OR_DISABLED));
+        profile.setName(request.getName());
+        profile.setUsername(request.getUsername());
+        if(StringUtils.hasLength(request.getImgUrl())) {
+            profile.setImgUrl(request.getImgUrl());
+        }
+
+        if(StringUtils.hasLength(request.getEmail())) {
+            profile.setEmail(request.getEmail());
+        }
+
+        if(StringUtils.hasLength(request.getAuthProvider())) {
+            profile.setAuthProvider(request.getAuthProvider());
+        }else {
+            profile.setAuthProvider("LOCAL");
+        }
+
+
+        userProfileRepository.save(profile);
         return userProfileMapper.toUserProfileResponse(profile);
     }
 }

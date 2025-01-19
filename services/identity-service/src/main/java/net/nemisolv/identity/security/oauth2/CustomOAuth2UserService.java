@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import net.nemisolv.identity.entity.User;
 import net.nemisolv.identity.helper.UserHelper;
 import net.nemisolv.identity.payload.profile.CreateOrUpdateUserProfile;
+import net.nemisolv.identity.payload.profile.CreateProfileRequest;
+import net.nemisolv.identity.payload.profile.UpdateProfileRequest;
 import net.nemisolv.identity.repository.RoleRepository;
 import net.nemisolv.identity.repository.UserRepository;
 import net.nemisolv.identity.repository.http.UserProfileClient;
@@ -87,13 +89,14 @@ private final UserProfileClient userProfileClient;
         user.setEnabled(true);
         user.setRole(roleRepo.findByName(RoleName.CUSTOMER).orElseThrow(() -> new RuntimeException("User Role not set.")));
         User savedUser = userRepo.save(user);
-        userProfileClient.createOrUpdateUserProfile(
-                CreateOrUpdateUserProfile.builder()
+        userProfileClient.createProfile(CreateProfileRequest.builder()
+                        .email(oauth2UserInfo.getEmail())
                         .name(oauth2UserInfo.getName())
-                        .imgUrl(oauth2UserInfo.getImageUrl())
+                        .username(username)
                         .userId(savedUser.getId().toString())
-                        .build()
-        );
+                .imgUrl(oauth2UserInfo.getImageUrl())
+                .authProvider(AuthProvider.getEnum(userRequest.getClientRegistration().getRegistrationId()).name())
+                .build());
         return savedUser;
     }
 
@@ -101,13 +104,16 @@ private final UserProfileClient userProfileClient;
         // allow user to update photo
 //        existingUser.setPicture(oauth2UserInfo.getImageUrl());
 
-        userProfileClient.createOrUpdateUserProfile(
-                CreateOrUpdateUserProfile.builder()
+
+
+        userProfileClient.updateProfile(UpdateProfileRequest.builder()
                         .name(oauth2UserInfo.getName())
+                        .username(userHelper.generateUsername(oauth2UserInfo.getName()))
+                        .email(oauth2UserInfo.getEmail())
                         .imgUrl(oauth2UserInfo.getImageUrl())
                         .userId(existingUser.getId().toString())
-                        .build()
-        );
+                        .authProvider(AuthProvider.getEnum(userRequest.getClientRegistration().getRegistrationId()).name())
+                .build());
 
 
         existingUser.setProviderId(oauth2UserInfo.getId());
