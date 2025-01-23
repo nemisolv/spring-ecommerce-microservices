@@ -3,22 +3,22 @@ package net.nemisolv.productservice.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import net.nemisolv.lib.core._enum.PermissionName;
 import net.nemisolv.lib.core.exception.ProductPurchaseException;
 import net.nemisolv.lib.core.exception.ResourceNotFoundException;
 import net.nemisolv.lib.payload.PagedResponse;
 import net.nemisolv.lib.payload.QueryOption;
 import net.nemisolv.lib.util.ResultCode;
 import net.nemisolv.productservice.client.InventoryClient;
+import net.nemisolv.productservice.entity.Category;
 import net.nemisolv.productservice.entity.Product;
+import net.nemisolv.productservice.entity.ProductVariant;
 import net.nemisolv.productservice.mapper.ProductMapper;
-import net.nemisolv.productservice.payload.exchange.CheckProductAvailabilityRequest;
-import net.nemisolv.productservice.payload.product.request.CreateProductRequest;
-import net.nemisolv.productservice.payload.product.request.ProductPurchaseRequest;
-import net.nemisolv.productservice.payload.product.request.UpdateProductRequest;
+import net.nemisolv.productservice.payload.product.request.*;
 import net.nemisolv.productservice.payload.product.response.ProductOverviewResponse;
 import net.nemisolv.productservice.payload.product.response.ProductPurchaseResponse;
 import net.nemisolv.productservice.payload.product.response.ProductResponse;
+import net.nemisolv.productservice.repository.BrandRepository;
+import net.nemisolv.productservice.repository.CategoryRepository;
 import net.nemisolv.productservice.repository.ProductRepository;
 import net.nemisolv.productservice.service.ProductService;
 import org.springframework.data.domain.Page;
@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,6 +38,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
+    private final BrandRepository brandRepository;
     private final ProductMapper productMapper;
     private final InventoryClient inventoryClient;
 
@@ -109,17 +110,109 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+
+    @Transactional
     public ProductResponse createProduct(CreateProductRequest productRequest) {
-        return null;
+        Long categoryId = productRequest.categoryId();
+        Long brandId = productRequest.brandId();
+        var product = productMapper.toProduct(productRequest);
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Category not found"));
+        product.setCategory(category);
+        if(brandId != null) {
+            brandRepository.findById(brandId)
+                    .ifPresent(product::setBrand);
+        }
+
+        // set variants
+        List<CreateProductVariantRequest> variantRequests = productRequest.variants();
+        if(variantRequests != null && !variantRequests.isEmpty()) {
+            var variants = new ArrayList<ProductVariant>();
+            for(var variantRequest: variantRequests) {
+                var name = variantRequest.name();
+                var value = variantRequest.value();
+                var variant = ProductVariant.builder()
+                        .name(name)
+                        .value(value)
+                        .product(product)
+                        .build();
+                variants.add(variant);
+            }
+            product.setVariants(variants);
+        }
+
+        // default average rating
+        product.setAverageRating(4.3f);
+
+        productRepository.save(product);
+
+
+        // create stock in inventory
+        inventoryClient.createStockProduct(
+                new CreateProductStockRequest(
+                        product.getId(),
+                        product.getQuantity()
+                )
+        );
+
+
+
+        return productMapper.toResponse(product);
+
     }
 
     @Override
     public ProductResponse updateProduct(Long id, UpdateProductRequest productRequest) {
-        return null;
+        Category category = categoryRepository.findById(productRequest.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException(ResultCode.RESOURCE_NOT_FOUND,"Category not found"));
+
+        Product product = productRepository.findById(id).orElseThrow();
+
+        brandRepository.findById(productRequest.brandId())
+                .ifPresent(product::setBrand);
+        product.setName(productRequest.name());
+//        product.setSku(productRequest.sku());
+        product.setDescription(productRequest.description());
+        product.setPrice(productRequest.price());
+        product.setUnit(productRequest.unit());
+        product.setMainImgUrl(productRequest.mainImgUrl());
+        product.setQuantity(productRequest.quantity());
+        product.setVideoUrl(productRequest.videoUrl());
+        product.setActive(productRequest.active());
+        product.setCategory(category);
+        product.setReviewStory(productRequest.reviewStory());
+
+        // set variants
+        List<ProductVariant> existingVariants = product.getVariants();
+        List<CreateProductVariantRequest> variantRequests = productRequest.variants();
+        if(variantRequests != null && !variantRequests.isEmpty()) {
+            var variants = new ArrayList<ProductVariant>();
+            for(var variantRequest: variantRequests) {
+                var name = variantRequest.name();
+                var value = variantRequest.value();
+                var variant = existingVariants.stream()
+                        .filter(v -> v.getName().equals(name))
+                        .findFirst()
+                        .orElseGet(() -> ProductVariant.builder()
+                                .name(name)
+                                .product(product)
+                                .build());
+                variant.setValue(value);
+                variants.add(variant);
+            }
+            product.setVariants(variants);
+        }
+
+        productRepository.save(product);
+
+        return productMapper.toResponse(product);
     }
 
     @Override
     public void deleteProduct(Long id) {
+
+        productRepository.deleteById(id);
+
 
     }
 
@@ -139,7 +232,8 @@ public class ProductServiceImpl implements ProductService {
         }
 
         // check stock in Inventory
-        var stockMap = inventoryClient.checkStock(productIds);
+        var response = inventoryClient.checkStock(productIds);
+        var stockMap = response.getData();
         for(var req: request) {
             if(stockMap.get(req.productId()) < req.quantity()) {
                 throw new ProductPurchaseException(ResultCode.PRODUCT_PURCHASE_FAILED,"Insufficient stock quantity for product with ID:: " + req.productId());
@@ -159,11 +253,12 @@ public class ProductServiceImpl implements ProductService {
 
 
         // notify inventory service to update stock
+        // passing negative quantity to reduce stock
         var updateMap = request.stream()
                 .collect(Collectors.toMap(ProductPurchaseRequest::productId,
-                        ProductPurchaseRequest::quantity));
+                        req -> -req.quantity()));
 
-        inventoryClient.updateStock(updateMap);
+        inventoryClient.updateQuantityInventory(updateMap);
 
         // map to response
         return storedProducts.stream()

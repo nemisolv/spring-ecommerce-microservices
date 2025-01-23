@@ -2,11 +2,14 @@ package net.nemisolv.productservice.payload.product.request;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 public record UpdateProductRequest(
         String name,
         String description,
         String mainImgUrl,
-        String price,
+        BigDecimal price,
         String unit,
         Integer quantity,
         String videoUrl,
@@ -15,6 +18,6 @@ public record UpdateProductRequest(
         String reviewStory,
         Long brandId,
         Long categoryId,
-        JsonNode variants
+        List<CreateProductVariantRequest> variants
 ) {
 }

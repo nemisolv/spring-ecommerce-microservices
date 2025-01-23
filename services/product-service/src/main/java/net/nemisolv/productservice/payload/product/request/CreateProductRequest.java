@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record CreateProductRequest(
         @NotBlank(message = "Name is mandatory")
@@ -39,7 +40,9 @@ public record CreateProductRequest(
         @NotNull(message = "Category ID is mandatory")
         Long categoryId,
 
+        Long brandId,
 
-        JsonNode variants
+
+        List<CreateProductVariantRequest> variants
 ) {
 }

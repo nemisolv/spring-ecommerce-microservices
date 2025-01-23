@@ -44,6 +44,12 @@ spring:
             - Path= ${app.api-prefix}/products/**
           filters:
               - StripPrefix=2
+        - id: inventory-service
+          uri: lb:http://inventory-service
+          predicates:
+            - Path= ${app.api-prefix}/inventories/**
+          filters:
+            - StripPrefix=2
 #        - id: payment-service
 #          uri: lb:http://PAYMENT-SERVICE
 #          predicates:

@@ -19,7 +19,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/products")
+@RequestMapping("/p")
 public class ProductController {
 
     private final ProductService productService;
@@ -74,13 +74,13 @@ public class ProductController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER') or hasAuthority('CREATE_PRODUCT')")
+    @PreAuthorize("hasAuthority('CREATE_PRODUCT')")
     public ApiResponse<ProductResponse> createProduct(@RequestBody @Valid CreateProductRequest productRequest) {
         return ApiResponse.success(productService.createProduct(productRequest));
     }
 
-    @PostMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER') or hasAuthority('UPDATE_PRODUCT')")
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('UPDATE_PRODUCT')")
     public ApiResponse<ProductResponse> updateProduct(@PathVariable Long id,
                                                       @RequestBody @Valid UpdateProductRequest productRequest) {
         return ApiResponse.success(productService.updateProduct(id, productRequest));
@@ -88,7 +88,7 @@ public class ProductController {
 
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('DELETE_PRODUCT')")
+    @PreAuthorize("hasAuthority('DELETE_PRODUCT')")
     public ApiResponse<String> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ApiResponse.success("Product deleted successfully");

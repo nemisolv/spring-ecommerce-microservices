@@ -1,11 +1,11 @@
 server:
-  port: 8050
+  port: 8063
   servlet:
-    context-path: /products
+    context-path: /inventories
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/my_ecommerce_product
+    url: jdbc:mysql://localhost:3306/my_ecommerce_inventory
     username: root
     password: nemisolv
   jpa:
@@ -14,12 +14,13 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     show-sql: true
 
-
-app:
-  config:
-    inventory-url: http://localhost:8063/inventories
-
-# for supporting Patch method
 feign:
   okhttp:
-    enabled: true
+    enabled=true:
+
+
+#app:
+#  config:
+#    inventory-url: http://localhost:8063/inventories
+
+
